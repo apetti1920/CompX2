@@ -1,14 +1,11 @@
 {
   "name": "@compx/common",
   "version": "1.0.0",
-  "description": "Common director for CompX",
-  "main": "dist/index.js",
+  "description": "Common directory for CompX",
+  "main": "src/index.ts",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npx rimraf dist && npx tsc"
+    "build": "npx rimraf dist && npx tsc -p ./config/tsconfig.json"
   },
-  "files": ["/dist"],
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "files": ["/dist"]
 }

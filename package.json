@@ -2,13 +2,12 @@
   "name": "compx",
   "private": true,
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
-    "build": "lerna run --parallel build"
+    "build": "npx lerna run build",
+    "start:electron": "npx lerna run --scope=@compx/electron_app build && npx lerna run start --scope=@compx/electron_app"
   },
   "keywords": [],
-  "author": "",
+  "author": "Aidan Petti",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^16.11.7",

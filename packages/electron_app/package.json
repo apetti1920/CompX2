@@ -1,0 +1,19 @@
+{
+  "name": "@compx/electron_app",
+  "version": "1.0.0",
+  "description": "Electron ",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "npx rimraf dist && OUTPUT_PATH=\"$(pwd)/dist/renderer\" npm run --prefix ../web_app build && npx tsc",
+    "start": "npm run build && electron ./dist/main/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "electron": "^16.0.0",
+    "@types/electron": "^1.6.10"
+  }
+}
