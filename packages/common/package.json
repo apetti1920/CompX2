@@ -5,7 +5,16 @@
   "main": "src/index.ts",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npx rimraf dist && npx tsc -p ./config/tsconfig.json"
+    "build": "npx rimraf dist && npx tsc",
+    "test": "jest"
   },
-  "files": ["/dist"]
+  "files": [
+    "/dist"
+  ],
+  "dependencies": {
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@types/uuid": "^8.3.3"
+  }
 }
