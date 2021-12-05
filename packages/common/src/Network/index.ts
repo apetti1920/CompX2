@@ -1,1 +1,2 @@
-export * from './errorhandling';
+export * from './ErrorHandling';
+export * from './BlockStorage';

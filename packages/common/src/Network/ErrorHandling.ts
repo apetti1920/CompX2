@@ -1,35 +1,19 @@
-const ErrorTypeStrings = ["info", "warning", "error"] as const;
-export class CompXError extends Error {
-    private errorType: typeof ErrorTypeStrings[number];
-    private compxStack?: CompXError;
+export const ErrorTypeStrings = ["info", "warning", "error"] as const;
 
-    static fromJSON(d: Object): CompXError {
-        const tmpD = d as any;
-        if (Array.isArray(d) || !("errorType" in tmpD && "title" in tmpD && "message" in tmpD) ||
-                !ErrorTypeStrings.includes(tmpD['errorType']) ||
-                typeof tmpD['title'] !== 'string' ||  typeof tmpD['message'] !== 'string'
-        ) throw new Error("Cannot serialize into CompXError Component");
+export type CompXErrorJson = {
+    errorType: typeof ErrorTypeStrings[number], name: string, message: string, stack?: CompXErrorJson
+};
 
-        const err = new CompXError(tmpD['errorType'], tmpD['title'], tmpD['message']);
-        if ("stack" in tmpD) err.compxStack = CompXError.fromJSON(tmpD['stack']);
+export function isCompXErrorJson(d: any): d is CompXErrorJson {
+    if (typeof d !== 'object' || Array.isArray(d)) return false;
 
-        return err;
-    }
+    const requiredKeys = ["errorType", "name", "message"]
+    if (!requiredKeys.every(k => k in d)) return false;
 
-    constructor(errorType: typeof ErrorTypeStrings[number], name: string, message: string) {
-        super(message);
-        Object.setPrototypeOf(this, CompXError.prototype);
-
-        this.errorType = errorType;
-        this.name = name;
-        this.message = message;
-    }
-
-    public AddToStack(err: CompXError) {
-        const tmpErr: CompXError = Object.assign({}, this);
-        this.errorType = err.errorType;
-        this.name = err.name;
-        this.message = err.message;
-        this.compxStack = tmpErr;
-    }
+    if (typeof d['errorType'] !== 'string' ||
+        !ErrorTypeStrings.includes(d['errorType'] as typeof ErrorTypeStrings[number])
+    ) return false
+    if (typeof d['name'] !== 'string') return false;
+    if (typeof d['message'] !== 'string') return false;
+    return !('stack' in d && !isCompXErrorJson(d['stack']));
 }

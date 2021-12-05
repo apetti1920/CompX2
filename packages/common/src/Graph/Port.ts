@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { CompXError } from "../Network";
-import {PortStorageType} from "../Network/BlockStorage";
+import { CompXError } from "../Helpers";
+import {PortStorageType} from "../Network";
 
 export interface PortTypes {
     STRING: string;
@@ -15,12 +15,13 @@ export class Port<T extends PortTypes[U], U extends keyof PortTypes> implements 
     public readonly initialValue?: T;
     private _objectValue?: T;
 
-    private constructor(name: string, parentId: string, type: U, initialValue?: T) {
-        this.id = uuidv4();
+    private constructor(name: string, parentId: string, type: U, initialValue?: T, id?: string) {
+        this.id = id ?? uuidv4();
         this.name = name;
         this.type = type;
         this.parentId = parentId;
         this.initialValue = initialValue;
+        if (initialValue !== undefined) this.SetValue(initialValue);
     }
 
     // Initializer to hide constructor
@@ -34,7 +35,8 @@ export class Port<T extends PortTypes[U], U extends keyof PortTypes> implements 
     public static InitializeFromStorage<U extends keyof PortTypes>(
         portStorage: PortStorageType<U>, parentId: string
     ): Port<PortTypes[U], U> {
-        return new Port(portStorage['id'], parentId, portStorage['type'], portStorage['initialValue']);
+        return new Port(portStorage['name'], parentId,
+            portStorage['type'], portStorage['initialValue'], portStorage['id']);
     }
 
     // Gets the current Value of the port
@@ -51,6 +53,26 @@ export class Port<T extends PortTypes[U], U extends keyof PortTypes> implements 
 
     // function to set the value of the port
     public SetValue(value: T): void {
+        // check if an error should be thrown based on the value type
+        let errCheck = false;
+        switch (this.type) {
+            case "NUMBER": {
+                if (typeof value !== 'number')
+                    errCheck = true;
+                break;
+            } case "STRING": {
+                if (typeof value !== 'number')
+                    errCheck = true;
+                break
+            }
+        }
+
+        // throw error if needed
+        if (errCheck)
+            throw new CompXError("error", "Port Value Error",
+                `Tried to set port ${this.id} of type ${this.type} to a value of type ${typeof value}`);
+
+        // set the objeects value
         this._objectValue = value
     }
 
