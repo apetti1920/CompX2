@@ -1,22 +1,28 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidV4 } from 'uuid';
 import { CompXError } from "../Helpers";
 import {PortStorageType} from "../Network";
 
-export interface PortTypes {
+export const PortTypesStringList = ['STRING', "NUMBER"] as const;
+type PortInterfaceType = {[K in typeof PortTypesStringList[number]]: any};
+export interface PortTypes extends PortInterfaceType {
     STRING: string;
     NUMBER: number;
 }
 
-export class Port<T extends PortTypes[U], U extends keyof PortTypes> implements PortStorageType<U> {
-    public readonly id: string;
-    public readonly name: string;
-    public readonly parentId: string;
-    public readonly type: U
-    public readonly initialValue?: T;
-    private _objectValue?: T;
+export type PortStringListType = ReadonlyArray<typeof PortTypesStringList[number]>;
+export type MapStringsToPortsType<T extends PortStringListType> =
+    { [K in keyof T]: T[K] extends PortStringListType[number] ? Port<T[K]> : never }
 
-    private constructor(name: string, parentId: string, type: U, initialValue?: T, id?: string) {
-        this.id = id ?? uuidv4();
+export class Port<U extends keyof PortTypes> implements PortStorageType<U> {
+    public readonly id: string;
+    public name: string;
+    public parentId: string;
+    public type: U
+    public initialValue?: PortTypes[U];
+    private _objectValue?: PortTypes[U];
+
+    private constructor(name: string, parentId: string, type: U, initialValue?: PortTypes[U]) {
+        this.id = uuidV4();
         this.name = name;
         this.type = type;
         this.parentId = parentId;
@@ -24,23 +30,16 @@ export class Port<T extends PortTypes[U], U extends keyof PortTypes> implements 
         if (initialValue !== undefined) this.SetValue(initialValue);
     }
 
-    // Initializer to hide constructor
-    public static Initialize<U extends keyof PortTypes>(
-        name: string, parentId: string, type: U, initialValue?: PortTypes[U]
-    ): Port<PortTypes[U], U> {
-        return new Port(name, parentId, type, initialValue);
-    }
-
     //static constructor from the port storage type
     public static InitializeFromStorage<U extends keyof PortTypes>(
         portStorage: PortStorageType<U>, parentId: string
-    ): Port<PortTypes[U], U> {
+    ): Port<U> {
         return new Port(portStorage['name'], parentId,
-            portStorage['type'], portStorage['initialValue'], portStorage['id']);
+            portStorage['type'], portStorage['initialValue']);
     }
 
     // Gets the current Value of the port
-    public GetObjectValue(): T | never {
+    public GetObjectValue(): PortTypes[U] | never {
         if (this._objectValue !== undefined)
             return this._objectValue;
         else
@@ -52,36 +51,17 @@ export class Port<T extends PortTypes[U], U extends keyof PortTypes> implements 
     }
 
     // function to set the value of the port
-    public SetValue(value: T): void {
-        // check if an error should be thrown based on the value type
-        let errCheck = false;
-        switch (this.type) {
-            case "NUMBER": {
-                if (typeof value !== 'number')
-                    errCheck = true;
-                break;
-            } case "STRING": {
-                if (typeof value !== 'number')
-                    errCheck = true;
-                break
-            }
-        }
-
-        // throw error if needed
-        if (errCheck)
-            throw new CompXError("error", "Port Value Error",
-                `Tried to set port ${this.id} of type ${this.type} to a value of type ${typeof value}`);
-
-        // set the objeects value
+    public SetValue(value: PortTypes[U]): void {
+       // set the objects value
         this._objectValue = value
     }
 
     public ToStorage(): PortStorageType<U> {
         return {
-            id: this.id,
             name: this.name,
             type: this.type,
             initialValue: this.initialValue
         }
     }
 }
+

@@ -3,6 +3,7 @@ import BaseConfig from '../../jest.config';
 
 const config: Config.InitialOptions = {
     ...BaseConfig,
-    rootDir: "./"
+    rootDir: "./",
+    collectCoverageFrom: ['src/**/*.ts']
 }
 export default config;

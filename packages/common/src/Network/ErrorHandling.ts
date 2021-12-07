@@ -15,5 +15,7 @@ export function isCompXErrorJson(d: any): d is CompXErrorJson {
     ) return false
     if (typeof d['name'] !== 'string') return false;
     if (typeof d['message'] !== 'string') return false;
-    return !('stack' in d && !isCompXErrorJson(d['stack']));
+    if ('stack' in d && !isCompXErrorJson(d['stack'])) return false;
+
+    return true;
 }
