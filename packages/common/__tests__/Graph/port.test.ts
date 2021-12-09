@@ -1,5 +1,6 @@
 import {PortStorageType, isPortStorageType} from "../../src/Network";
 import {Port} from "../../src/Graph";
+import exp from "constants";
 
 // Tests port features
 describe("Port Tests", () => {
@@ -43,6 +44,17 @@ describe("Port Tests", () => {
         expect(port.GetObjectValue()).toBe(0);
         port.SetValue(1);
         expect(port.GetObjectValue()).toBe(1);
+    });
+
+    // Tests if a port's type can be changed
+    test("Change port type", () => {
+        const portStorage: PortStorageType<"NUMBER"> = { name: "p1", type: "NUMBER", initialValue: 0};
+        const port1 = Port.InitializeFromStorage(portStorage, "1");
+        const port2 = port1.GetPortResetType("STRING", "");
+
+        expect(port2.name).toBe(port1.name);
+        expect(port2.type).toBe("STRING");
+        expect(port2.initialValue).toBe("");
     });
 
     // Tests if a port can be saved

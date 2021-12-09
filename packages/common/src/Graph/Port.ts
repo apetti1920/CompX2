@@ -8,16 +8,21 @@ export interface PortTypes extends PortInterfaceType {
     STRING: string;
     NUMBER: number;
 }
+export const PortTypeInitializers: PortTypes = {
+    STRING: "",
+    NUMBER: 0
+}
 
-export type PortStringListType = ReadonlyArray<typeof PortTypesStringList[number]>;
+type StringListUnionType = typeof PortTypesStringList[number]
+export type PortStringListType = StringListUnionType[];
 export type MapStringsToPortsType<T extends PortStringListType> =
     { [K in keyof T]: T[K] extends PortStringListType[number] ? Port<T[K]> : never }
 
 export class Port<U extends keyof PortTypes> implements PortStorageType<U> {
-    public readonly id: string;
+    private readonly id: string;
     public name: string;
-    public parentId: string;
-    public type: U
+    public readonly parentId: string;
+    public readonly type: U
     public initialValue?: PortTypes[U];
     private _objectValue?: PortTypes[U];
 
@@ -54,6 +59,15 @@ export class Port<U extends keyof PortTypes> implements PortStorageType<U> {
     public SetValue(value: PortTypes[U]): void {
        // set the objects value
         this._objectValue = value
+    }
+
+    // function to set the objects type
+    public GetPortResetType<U extends keyof PortTypes>(type: U, initialValue?: PortTypes[U]) {
+        return Port.InitializeFromStorage({
+            name: this.name,
+            type: type,
+            initialValue: initialValue
+        }, this.parentId);
     }
 
     public ToStorage(): PortStorageType<U> {

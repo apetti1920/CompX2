@@ -65,7 +65,7 @@ describe("Block Tests", () => {
         let block: Block<[], ["NUMBER"]>;
 
         beforeAll(() => {
-            block = Block.initializeFromStorage(testBlock2);
+            block = Block.InitializeFromStorage(testBlock2);
         });
 
         test("Callback Call Error", () => {
@@ -89,6 +89,9 @@ describe("Block Tests", () => {
             expect(block.outputPorts[0].GetObjectValue()).toBe(50);
         });
 
-
+        test("Change Output Port", () => {
+            const b2 = block.ChangeOutputPortType(0, "STRING");
+            expect(b2.outputPorts[0].type).toBe("STRING");
+        });
     });
 });
