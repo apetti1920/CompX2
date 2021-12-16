@@ -1,16 +1,19 @@
-import {EdgePointType, EdgeStorage} from "../Network/BlockStorage/EdgeStorage";
+import { EdgePointType, EdgeStorageType } from "../Network/GraphItemStorage";
 import {PortTypes} from "./Port";
+import {GraphObject} from "./index";
 
-class Edge<U extends keyof PortTypes> {
-    public edgeType: U;
+export class Edge<U extends keyof PortTypes> implements EdgeStorageType<U>, GraphObject<Edge<U>>{
+    public type: U;
     public input: EdgePointType;
     public output: EdgePointType;
 
     private constructor(edgeType: U, input: EdgePointType, output: EdgePointType) {
-        this.edgeType = edgeType;
+        this.type = edgeType;
         this.input = input;
         this.output = output;
     }
 
-
+    ToStorage(): EdgeStorageType<U> {
+        return this
+    }
 }

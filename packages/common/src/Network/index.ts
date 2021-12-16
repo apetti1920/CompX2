@@ -1,2 +1,2 @@
 export * from './ErrorHandling';
-export * from './BlockStorage';
+export * from './GraphItemStorage';

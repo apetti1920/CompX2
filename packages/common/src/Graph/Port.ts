@@ -1,6 +1,7 @@
 import { v4 as uuidV4 } from 'uuid';
 import { CompXError } from "../Helpers";
 import {PortStorageType} from "../Network";
+import {GraphObject} from "./index";
 
 export const PortTypesStringList = ['STRING', "NUMBER"] as const;
 type PortInterfaceType = {[K in typeof PortTypesStringList[number]]: any};
@@ -18,7 +19,7 @@ export type PortStringListType = StringListUnionType[];
 export type MapStringsToPortsType<T extends PortStringListType> =
     { [K in keyof T]: T[K] extends PortStringListType[number] ? Port<T[K]> : never }
 
-export class Port<U extends keyof PortTypes> implements PortStorageType<U> {
+export class Port<U extends keyof PortTypes> implements PortStorageType<U>, GraphObject<Port<U>> {
     private readonly id: string;
     public name: string;
     public readonly parentId: string;
