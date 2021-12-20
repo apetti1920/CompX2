@@ -1,4 +1,8 @@
-import {BlockStorageType, isBlockStorageType} from "../../src/Network";
+import {
+    BlockStorageType,
+    BlockStorageWithIDType,
+    isBlockStorageType, isBlockStorageWithIDType
+} from "../../src/Network/GraphItemStorage/BlockStorage";
 import {Block} from "../../src/Graph/Block";
 
 describe("Block Tests", () => {
@@ -49,6 +53,49 @@ describe("Block Tests", () => {
             const b6 = {...testBlock1} as any;
             b6.outputPorts = 0;
             expect(isBlockStorageType(b6)).not.toBeTruthy();
+        });
+
+        test("Test is block storage with id", () => {
+            const testBlock2: BlockStorageWithIDType<["STRING"], ["NUMBER"]> = {
+                id: "12345",
+                name: "test", description: "a test block", tags: ['test'],
+                inputPorts: [
+                    { id: "", name: "test p 1", type: "STRING", initialValue: "" }
+                ],
+                outputPorts: [
+                    { id: "", name: "test p 2", type: "NUMBER", initialValue: 0 }
+                ],
+                callbackString: ""
+            }
+
+            expect(isBlockStorageWithIDType(testBlock2)).toBeTruthy();
+
+            const testBlock3 = {
+                name: "test", description: "a test block", tags: ['test'],
+                inputPorts: [
+                    { id: "", name: "test p 1", type: "STRING", initialValue: "" }
+                ],
+                outputPorts: [
+                    { id: "", name: "test p 2", type: "NUMBER", initialValue: 0 }
+                ],
+                callbackString: ""
+            }
+
+            expect(isBlockStorageWithIDType(testBlock3)).not.toBeTruthy();
+
+            const testBlock4 = {
+                id: "",
+                name: "test", description: "a test block", tags: ['test'],
+                inputPorts: [
+                    { name: "test p 1", type: "STRING", initialValue: "" }
+                ],
+                outputPorts: [
+                    { id: "", name: "test p 2", type: "NUMBER", initialValue: 0 }
+                ],
+                callbackString: ""
+            }
+
+            expect(isBlockStorageWithIDType(testBlock4)).not.toBeTruthy();
         });
     });
 

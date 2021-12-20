@@ -1,3 +1,5 @@
+export interface WithID { id: string }
+
 // Conditionals
 export type True = '1';
 export type False = '0';

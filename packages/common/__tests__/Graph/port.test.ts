@@ -1,6 +1,11 @@
-import {PortStorageType, isPortStorageType} from "../../src/Network";
-import {Port} from "../../src/Graph";
-import exp from "constants";
+import _ from 'lodash';
+
+import {
+    PortStorageType,
+    isPortStorageType,
+    isPortStorageWithIDType, PortStorageWithIDType
+} from "../../src/Network/GraphItemStorage/PortStorage";
+import {Port} from "../../src/Graph/Port";
 
 // Tests port features
 describe("Port Tests", () => {
@@ -27,6 +32,14 @@ describe("Port Tests", () => {
 
         const p4 = { name: "test1", type: "STRING", initialValue: 0 };
         expect(isPortStorageType(p4)).not.toBeTruthy();
+    });
+
+    test("Is port storage with ID type", () => {
+        const p0: PortStorageWithIDType<"STRING"> = { id: "", name: "test1", type: "STRING", initialValue: "" };
+        expect(isPortStorageWithIDType(p0)).toBeTruthy();
+
+        const p1 = { name: "test1", type: "STRING", initialValue: 0 };
+        expect(isPortStorageWithIDType(p1)).not.toBeTruthy();
     });
 
     // Tests if a port can be instantiated from storage
@@ -61,7 +74,8 @@ describe("Port Tests", () => {
     test("To port storage type", () => {
         const portStorage: PortStorageType<"NUMBER"> = { name: "p1", type: "NUMBER", initialValue: 0};
         const port = Port.InitializeFromStorage(portStorage, "1");
-        expect(port.ToStorage()).toEqual(portStorage);
+        expect(_.omit(port.ToStorage(), ['id'])).toEqual(portStorage);
+
     });
 
     // test if an uninitialized port throws an error when accessing its value

@@ -1,6 +1,7 @@
-import { isPortStorageType } from "./PortStorage";
+import { isPortStorageType, isPortStorageWithIDType } from "./PortStorage";
 import { PortStringListType } from "../../Graph/Port";
-import { MapStringsToPortStoragesType } from "../../Graph/Block";
+import { MapStringsToPortStoragesType, MapStringsToPortStoragesWithIDType } from "../../Graph/Block";
+import { WithID } from "../../Helpers/Types";
 
 export type BlockStorageType<
     Inputs extends PortStringListType, Outputs extends PortStringListType
@@ -30,4 +31,24 @@ export function isBlockStorageType<
     if (typeof obj["callbackString"] !== "string") return false;
 
     return true;
+}
+
+interface TempIOsWithIDType<Inputs extends PortStringListType, Outputs extends PortStringListType> {
+    inputPorts: MapStringsToPortStoragesWithIDType<Inputs>, outputPorts: MapStringsToPortStoragesWithIDType<Outputs>
+}
+export interface BlockStorageWithIDType<Inputs extends PortStringListType, Outputs extends PortStringListType>
+    extends WithID, Omit<BlockStorageType<Inputs, Outputs>, "inputPorts" | "outputPorts">, TempIOsWithIDType<Inputs, Outputs> {}
+export function isBlockStorageWithIDType<
+    Inputs extends PortStringListType,
+    Outputs extends PortStringListType>(obj: any): obj is BlockStorageWithIDType<Inputs, Outputs>
+{
+    if (!isBlockStorageType(obj)) return false;
+    if (!("id" in obj) || typeof obj['id'] !== 'string') return false;
+
+    if (!Array.isArray(obj['outputPorts']) || !(obj['outputPorts'] as any[])
+        .every((p: any) => isPortStorageWithIDType(p))) return false;
+    if (!Array.isArray(obj['inputPorts']) || !(obj['inputPorts'] as any[])
+        .every((p: any) => isPortStorageWithIDType(p))) return false;
+
+    return true
 }

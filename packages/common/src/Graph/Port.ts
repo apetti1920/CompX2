@@ -1,7 +1,7 @@
 import { v4 as uuidV4 } from 'uuid';
-import { CompXError } from "../Helpers";
-import {PortStorageType} from "../Network";
-import {GraphObject} from "./index";
+import { CompXError } from "../Helpers/ErrorHandling";
+import {PortStorageType, PortStorageWithIDType} from "../Network/GraphItemStorage/PortStorage";
+import { GraphObject } from "./GraphObjectBase";
 
 export const PortTypesStringList = ['STRING', "NUMBER"] as const;
 type PortInterfaceType = {[K in typeof PortTypesStringList[number]]: any};
@@ -20,7 +20,7 @@ export type MapStringsToPortsType<T extends PortStringListType> =
     { [K in keyof T]: T[K] extends PortStringListType[number] ? Port<T[K]> : never }
 
 export class Port<U extends keyof PortTypes> implements PortStorageType<U>, GraphObject<Port<U>> {
-    private readonly id: string;
+    public id: string;
     public name: string;
     public readonly parentId: string;
     public readonly type: U
@@ -64,15 +64,20 @@ export class Port<U extends keyof PortTypes> implements PortStorageType<U>, Grap
 
     // function to set the objects type
     public GetPortResetType<U extends keyof PortTypes>(type: U, initialValue?: PortTypes[U]) {
-        return Port.InitializeFromStorage({
+        const tempPort = Port.InitializeFromStorage({
             name: this.name,
             type: type,
             initialValue: initialValue
         }, this.parentId);
+
+        tempPort.id = this.id;
+
+        return tempPort;
     }
 
-    public ToStorage(): PortStorageType<U> {
+    public ToStorage(): PortStorageWithIDType<U> {
         return {
+            id: this.id,
             name: this.name,
             type: this.type,
             initialValue: this.initialValue

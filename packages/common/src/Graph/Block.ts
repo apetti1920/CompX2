@@ -1,12 +1,17 @@
-import { BlockStorageType, PortStorageType } from "../Network";
+import _ from 'lodash';
+
+import {BlockStorageType, BlockStorageWithIDType} from "../Network/GraphItemStorage/BlockStorage";
+import {PortStorageType, PortStorageWithIDType} from "../Network/GraphItemStorage/PortStorage";
 import {Port, PortStringListType, PortTypes} from "./Port";
 import { v4 as uuidV4 } from "uuid";
-import { CompXError } from "../Helpers";
-import { GraphObject } from "./index";
+import { CompXError } from "../Helpers/ErrorHandling";
+import { GraphObject } from "./GraphObjectBase";
 import {ReplaceInTuple} from "../Helpers/Types";
 
 export type MapStringsToPortStoragesType<T extends PortStringListType> =
     { [K in keyof T]: T[K] extends PortStringListType[number] ? PortStorageType<T[K]> : never };
+export type MapStringsToPortStoragesWithIDType<T extends PortStringListType> =
+    { [K in keyof T]: T[K] extends PortStringListType[number] ? PortStorageWithIDType<T[K]> : never };
 export type MapStringsToPortsType<T extends PortStringListType> =
     { [K in keyof T]: T[K] extends PortStringListType[number] ? Port<T[K]> : never };
 export type MapStringsToTypes<T extends PortStringListType> =
@@ -20,7 +25,7 @@ type Callback<Inputs extends PortStringListType, Outputs extends PortStringListT
 export class Block<Inputs extends PortStringListType, Outputs extends PortStringListType>
     implements Omit<BlockStorageType<Inputs, Outputs>, "callbackString">, GraphObject<Block<Inputs, Outputs>>
 {
-    public readonly id: string;
+    id: string;
     public name: string;
     public description: string;
     public tags: string[];
@@ -76,14 +81,18 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
                 `Port ${this.inputPorts[portIndex].name} is already a ${type}`
             )
 
-        const tempInputs = [...this.inputPorts] as MapStringsToPortsType<PortStringListType>
+        const tempInputs = _.cloneDeep(this.inputPorts) as MapStringsToPortsType<PortStringListType>
 
         tempInputs[portIndex] =
             tempInputs[portIndex].GetPortResetType(type, initialValue);
 
         const storage = JSON.parse(JSON.stringify(this.ToStorage()));
         storage['inputPorts'] = tempInputs;
-        return Block.InitializeFromStorage(storage);
+
+        const tempBlock = Block.InitializeFromStorage(storage);
+        tempBlock.id = this.id;
+
+        return tempBlock as never as Block<ReplaceInTuple<Inputs, I, U>, Outputs>;
     }
 
     // public ChangeOutputPortType<U extends keyof PortTypes>(
@@ -119,13 +128,14 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
     //     this.inputPorts.forEach((p, i) => { p.SetValue(newInputs[i]); });
     // }
 
-    public ToStorage(): BlockStorageType<Inputs, Outputs> {
+    public ToStorage(): BlockStorageWithIDType<Inputs, Outputs> {
         return {
+            id: this.id,
             name: this.name,
             description: this.description,
             tags: this.tags,
-            inputPorts: this.inputPorts.map(p => p.ToStorage()) as never as MapStringsToPortStoragesType<Inputs>,
-            outputPorts: this.outputPorts.map(p => p.ToStorage()) as never as MapStringsToPortStoragesType<Outputs>,
+            inputPorts: this.inputPorts.map(p => p.ToStorage()) as never as MapStringsToPortStoragesWithIDType<Inputs>,
+            outputPorts: this.outputPorts.map(p => p.ToStorage()) as never as MapStringsToPortStoragesWithIDType<Outputs>,
             callbackString: this._callbackString
         }
     }

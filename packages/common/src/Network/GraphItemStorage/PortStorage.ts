@@ -1,4 +1,5 @@
 import { PortTypes, PortTypesStringList } from "../../Graph/Port";
+import {WithID} from "../../Helpers/Types";
 
 export interface PortStorageType<U extends keyof PortTypes> {
     name: string,
@@ -31,4 +32,12 @@ export function isPortStorageType<U extends keyof PortTypes>(obj: any): obj is P
     }
 
     return true;
+}
+
+export interface PortStorageWithIDType<U extends keyof PortTypes> extends WithID, PortStorageType<U> {}
+export function isPortStorageWithIDType<U extends keyof PortTypes>(obj: any): obj is PortStorageWithIDType<U> {
+    if (!isPortStorageType(obj)) return false;
+    if (!("id" in obj) || typeof obj['id'] !== 'string') return false;
+
+    return true
 }

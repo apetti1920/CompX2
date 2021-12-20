@@ -1,5 +1,5 @@
-import { CompXError } from "../../src/Helpers";
-import { CompXErrorJson, isCompXErrorJson} from '../../src/Network';
+import { CompXError } from "../../src/Helpers/ErrorHandling";
+import { CompXErrorJson, isCompXErrorJson} from '../../src/Network/ErrorHandling';
 
 describe("Error Handling Tests", () => {
     test("Does Construct", () => {
@@ -32,6 +32,9 @@ describe("Error Handling Tests", () => {
     });
 
     test("Is error json bad", () => {
+        const d0a = "test";
+        expect(isCompXErrorJson(d0a)).not.toBeTruthy();
+
         const d1 = {errorType: "test", name: "test2", message: "test2 err"};
         expect(isCompXErrorJson(d1)).not.toBeTruthy();
 

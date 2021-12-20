@@ -1,4 +1,4 @@
-import {CompXErrorJson, ErrorTypeStrings} from "../Network";
+import {CompXErrorJson, ErrorTypeStrings} from "../Network/ErrorHandling";
 export {ErrorTypeStrings};
 
 export class CompXError extends Error {

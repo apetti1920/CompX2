@@ -23,7 +23,7 @@ const config: Config.InitialOptions = {
   //coverageDirectory: "__tests__/coverage",
 
   // An array of regexp pattern strings used to skip coverage collection
-  coveragePathIgnorePatterns: [ "/node_modules/", "/dist/", "index.ts" ],
+  coveragePathIgnorePatterns: [ "/node_modules/", "/dist/", "index.ts", "Types.ts", "types.ts" ],
 
   // Indicates which provider should be used to instrument code for coverage
   coverageProvider: "v8",
