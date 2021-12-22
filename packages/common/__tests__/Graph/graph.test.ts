@@ -50,5 +50,98 @@ describe("Graph Tests", () => {
 
             expect(graph.blocks.length).toBe(2);
         });
+
+        describe("Add edge tests", () => {
+            const graph = new Graph({
+                blocks: [{
+                    id: "1", name: "", tags: [], description: "", callbackString: "",
+                    inputPorts: [{id: "1ia", name: "", type: "STRING", initialValue: ""}],
+                    outputPorts: [{id: "1oa", name: "", type: "STRING", initialValue: ""}]
+                },{
+                    id: "2", name: "", tags: [], description: "", callbackString: "",
+                    inputPorts: [{id: "2ia", name: "", type: "STRING", initialValue: ""}],
+                    outputPorts: [{id: "2oa", name: "", type: "STRING", initialValue: ""}]
+                },{
+                    id: "3", name: "", tags: [], description: "", callbackString: "",
+                    inputPorts: [{id: "3ia", name: "", type: "STRING", initialValue: ""}],
+                    outputPorts: [{id: "3oa", name: "", type: "STRING", initialValue: ""}]
+                },{
+                    id: "4", name: "", tags: [], description: "", callbackString: "",
+                    inputPorts: [{id: "4ia", name: "", type: "NUMBER", initialValue: ""}],
+                    outputPorts: [{id: "4oa", name: "", type: "STRING", initialValue: ""}]
+                }],
+                edges: [
+                    { id: "1", type: "STRING",
+                        output: {blockID: "1", portID: "1oa" },
+                        input: { blockID: "2", portID: "2ia" }
+                    }
+                ]
+            });
+
+            test("Edge already exists", () => {
+                graph.AddEdge("1", "1oa", "2", "2ia");
+                expect(graph.edges.length).toBe(1);
+            });
+
+            test("Output block does not exist", () => {
+                expect(() => graph.AddEdge("test", "1oa", "2", "2ia"))
+                    .toThrowError()
+            });
+
+            test("Output port does not exist", () => {
+                expect(() => graph.AddEdge("1", "test", "2", "2ia"))
+                    .toThrowError()
+            });
+
+            test("Input block does not exist", () => {
+                expect(() => graph.AddEdge("1", "1oa", "test", "2ia"))
+                    .toThrowError()
+            });
+
+            test("Input port does not exist", () => {
+                expect(() => graph.AddEdge("1", "1oa", "2", "test"))
+                    .toThrowError()
+            });
+
+            test("Differing port types", () => {
+                expect(() => graph.AddEdge("3", "3oa", "4", "4ia"))
+                    .toThrowError()
+            });
+
+            test("Can add an edge", () => {
+                graph.AddEdge("2", "2oa", "3", "3ia");
+                expect(graph.edges.length).toBe(2)
+            });
+        });
+
+       test("Graph to storage", () => {
+           const graph = new Graph({
+               blocks: [{
+                   id: "1", name: "", tags: [], description: "", callbackString: "",
+                   inputPorts: [{id: "1ia", name: "", type: "STRING", initialValue: ""}],
+                   outputPorts: [{id: "1oa", name: "", type: "STRING", initialValue: ""}]
+               },{
+                   id: "2", name: "", tags: [], description: "", callbackString: "",
+                   inputPorts: [{id: "2ia", name: "", type: "STRING", initialValue: ""}],
+                   outputPorts: [{id: "2oa", name: "", type: "STRING", initialValue: ""}]
+               },{
+                   id: "3", name: "", tags: [], description: "", callbackString: "",
+                   inputPorts: [{id: "3ia", name: "", type: "STRING", initialValue: ""}],
+                   outputPorts: [{id: "3oa", name: "", type: "STRING", initialValue: ""}]
+               },{
+                   id: "4", name: "", tags: [], description: "", callbackString: "",
+                   inputPorts: [{id: "4ia", name: "", type: "NUMBER", initialValue: 0}],
+                   outputPorts: [{id: "4oa", name: "", type: "STRING", initialValue: ""}]
+               }],
+               edges: [
+                   { id: "1", type: "STRING",
+                       output: {blockID: "1", portID: "1oa" },
+                       input: { blockID: "2", portID: "2ia" }
+                   }
+               ]
+           });
+
+           expect(isGraphStorageType(graph.ToStorage())).toBeTruthy();
+       });
    });
 });

@@ -22,7 +22,7 @@ export type MapStringsToPortsType<T extends PortStringListType> =
 export class Port<U extends keyof PortTypes> implements PortStorageType<U>, GraphObject<Port<U>> {
     public id: string;
     public name: string;
-    public readonly parentId: string;
+    public parentId: string;
     public readonly type: U
     public initialValue?: PortTypes[U];
     private _objectValue?: PortTypes[U];

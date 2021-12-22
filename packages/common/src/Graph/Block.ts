@@ -62,6 +62,32 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
         );
     }
 
+    public static InitializeFromStorageWithId<
+        Inputs extends PortStringListType,
+        Outputs extends PortStringListType
+        >(blockStorage: BlockStorageWithIDType<Inputs, Outputs>): Block<Inputs, Outputs>
+    {
+        const tmpBlock = new Block(
+            blockStorage.name, blockStorage.description, blockStorage.tags,
+            blockStorage.inputPorts.map(p => _.omit(p, ["id"])),
+            blockStorage.outputPorts.map(p => _.omit(p, ["id"])), blockStorage.callbackString
+        );
+
+        tmpBlock.id = blockStorage.id;
+        tmpBlock.inputPorts.map((p, i) => {
+            const tmpP = p;
+            tmpP.id = blockStorage.inputPorts[i].id;
+            tmpP.parentId = tmpBlock.id;
+        });
+        tmpBlock.outputPorts.map((p, i) => {
+            const tmpP = p;
+            tmpP.id = blockStorage.outputPorts[i].id;
+            tmpP.parentId = tmpBlock.id;
+        });
+
+        return tmpBlock as never as Block<Inputs, Outputs>;
+    }
+
     set callbackString(value: string) {
         this._callbackString = value;
     }
