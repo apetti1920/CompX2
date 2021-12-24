@@ -3,9 +3,9 @@ import _ from 'lodash';
 import {BlockStorageType, BlockStorageWithIDType} from "../Network/GraphItemStorage/BlockStorage";
 import {PortStorageType, PortStorageWithIDType} from "../Network/GraphItemStorage/PortStorage";
 import {Port, PortStringListType, PortTypes} from "./Port";
-import { v4 as uuidV4 } from "uuid";
-import { CompXError } from "../Helpers/ErrorHandling";
-import { GraphObject } from "./GraphObjectBase";
+import {v4 as uuidV4} from "uuid";
+import {CompXError} from "../Helpers/ErrorHandling";
+import {GraphObject} from "./GraphObjectBase";
 import {ReplaceInTuple} from "../Helpers/Types";
 
 export type MapStringsToPortStoragesType<T extends PortStringListType> =
@@ -23,15 +23,15 @@ type Callback<Inputs extends PortStringListType, Outputs extends PortStringListT
 ) => MapStringsToTypes<Outputs>;
 
 export class Block<Inputs extends PortStringListType, Outputs extends PortStringListType>
-    implements Omit<BlockStorageType<Inputs, Outputs>, "callbackString">, GraphObject<Block<Inputs, Outputs>>
+    implements BlockStorageWithIDType<Inputs, Outputs>, GraphObject<Block<Inputs, Outputs>>
 {
-    id: string;
+    public id: string;
     public name: string;
     public description: string;
     public tags: string[];
     public inputPorts: MapStringsToPortsType<Inputs>;
     public outputPorts: MapStringsToPortsType<Outputs>;
-    private _callbackString: string;
+    public callbackString: string;
     private _callback?: Callback<Inputs, Outputs>;
 
     // hide the constructor from view
@@ -48,7 +48,7 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
             inputPorts.map(i => Port.InitializeFromStorage(i, this.id)) as unknown as MapStringsToPortsType<Inputs>;
         this.outputPorts =
             outputPorts.map(i => Port.InitializeFromStorage(i, this.id)) as unknown as MapStringsToPortsType<Outputs>;
-        this._callbackString = callbackString;
+        this.callbackString = callbackString;
     }
 
     //initialize a block from a storage object
@@ -88,12 +88,52 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
         return tmpBlock as never as Block<Inputs, Outputs>;
     }
 
-    set callbackString(value: string) {
-        this._callbackString = value;
+    // Converts a callback string to a callback
+    private ConvertCallback(callbackStr: string): Callback<Inputs, Outputs> | never {
+        let callbackString = callbackStr.replace(new RegExp("prevInputs\\[(\\w+)\\]","gm"), (a, b) => {
+            const index = this.inputPorts.map(port => port.name).indexOf(b);
+            if (index === -1)
+                throw new CompXError("error", `Conversion Error`, `Previnputs ${b} not found`)
+            return `prevInputs[${index}]`;
+        });
+
+        callbackString = callbackString.replace(new RegExp("prevOutputs\\[(\\w+)\\]","gm"), (a, b) => {
+            const index = this.outputPorts.map(port => port.name).indexOf(b);
+            if (index === -1)
+                throw new CompXError("error", `Conversion Error`, `Prevoutputs ${b} not found`)
+            return `prevOutputs[${index}]`;
+        });
+
+        callbackString = callbackString.replace(new RegExp("inputPort\\[(\\w+)\\]","gm"), (a, b) => {
+            const index = this.inputPorts.map((port) => port.name).indexOf(b);
+            if (index === -1)
+                throw new CompXError("error", `Conversion Error`, `Input port ${b} not found`)
+            return `newInputs[${index}]`;
+        });
+
+        // callbackString = callbackString.replace(new RegExp("internalData\\[(\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b)\\]","gm"), (a, b) => {
+        //     return `Number(this.internalData.find(i => i.id === "${b}").value)`;
+        // });
+
+        // callbackString = callbackString.replace(new RegExp("display\\s*\\(([\\s\\S]*)\\)\\s*;?","gm"), (a, b) => {
+        //     return `if (displayData !== undefined) {displayData["${this.id}"]=${b}}`;
+        // });
+
+        callbackString = `try{${callbackString}}catch(err){console.log(err);}`
+
+        try {
+            return new Function("t", "dt", "prevInputs", "prevOutputs", "newInputs", "displayData", callbackString)
+                .bind(this);
+        } catch (syntaxError: any) {
+            console.error("illegal code; syntax errors: ", syntaxError);
+            console.info(syntaxError.name ,"-", syntaxError.message);
+            throw syntaxError;
+        }
     }
 
-    public SetCallback(callback: Callback<Inputs, Outputs>) {
-        this._callback = callback;
+    public SetCallback(callbackStr: string): void | never {
+        this._callback = this.ConvertCallback(callbackStr);
+        this.callbackString = callbackStr;
     }
 
     public ChangeInputPortType<I extends number, U extends keyof PortTypes>(
@@ -121,38 +161,43 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
         return tempBlock as never as Block<ReplaceInTuple<Inputs, I, U>, Outputs>;
     }
 
-    // public ChangeOutputPortType<U extends keyof PortTypes>(
-    //     portIndex: number, type: U, initialValue?: PortTypes[U] ): Block<Inputs, PortStringListType>
-    // {
-    //     if (!Number.isInteger(portIndex) || portIndex < 0 || portIndex > this.outputPorts.length - 1)
-    //         throw new CompXError("error", "Change Output Error", "Not a valid index");
-    //     if (this.outputPorts[portIndex].type === type)
-    //         throw new CompXError(
-    //             "warning", "Change Output Warning",
-    //             `Port ${this.outputPorts[portIndex].name} is already a ${type}`
-    //         )
-    //
-    //     const outputs = Object.assign({}, this.outputPorts) as MapStringsToPortsType<PortStringListType>;
-    //     outputs[portIndex] = outputs[portIndex].GetPortResetType(type, initialValue);
-    //
-    //     const block = Object.assign({}, this) as Block<Inputs, PortStringListType>;
-    //     block.outputPorts = outputs;
-    //
-    //     return block;
-    // }
-    //
-    // public Execute(t: number, dt: number, newInputs: MapStringsToTypes<Inputs>): void {
-    //     if (this._callback === undefined)
-    //         throw new CompXError("error", "Block Execute Error", "Callback was left undefined");
-    //
-    //     const prevInputs = this.inputPorts.map(p => p.GetObjectValue()) as unknown as MapStringsToTypes<Inputs>;
-    //     const prevOutputs = this.outputPorts.map(p => p.GetObjectValue()) as unknown as MapStringsToTypes<Outputs>;
-    //
-    //     const newOutputs = this._callback(t, dt, prevInputs, prevOutputs, newInputs);
-    //
-    //     this.outputPorts.forEach((p, i) => { p.SetValue(newOutputs[i]); });
-    //     this.inputPorts.forEach((p, i) => { p.SetValue(newInputs[i]); });
-    // }
+    public ChangeOutputPortType<I extends number, U extends keyof PortTypes>(
+        portIndex: I, type: U, initialValue?: PortTypes[U] ): Block<Inputs, ReplaceInTuple<Outputs, I, U>>
+    {
+        if (!Number.isInteger(portIndex) || portIndex < 0 || portIndex > this.outputPorts.length - 1)
+            throw new CompXError("error", "Change Output Error", "Not a valid index");
+        if (this.outputPorts.length > 0 && this.outputPorts[portIndex].type === type)
+            throw new CompXError(
+                "warning", "Change Output Warning",
+                `Port ${this.outputPorts[portIndex].name} is already a ${type}`
+            )
+
+        const tempOutputs = _.cloneDeep(this.outputPorts) as MapStringsToPortsType<PortStringListType>
+
+        tempOutputs[portIndex] =
+            tempOutputs[portIndex].GetPortResetType(type, initialValue);
+
+        const storage = JSON.parse(JSON.stringify(this.ToStorage()));
+        storage['outputPorts'] = tempOutputs;
+
+        const tempBlock = Block.InitializeFromStorage(storage);
+        tempBlock.id = this.id;
+
+        return tempBlock as never as Block<Inputs, ReplaceInTuple<Outputs, I, U>>;
+    }
+
+    public Execute(t: number, dt: number, newInputs: MapStringsToTypes<Inputs>): void {
+        if (this._callback === undefined)
+            throw new CompXError("error", "Block Execute Error", "Callback was left undefined");
+
+        const prevInputs = this.inputPorts.map(p => p.GetObjectValue()) as unknown as MapStringsToTypes<Inputs>;
+        const prevOutputs = this.outputPorts.map(p => p.GetObjectValue()) as unknown as MapStringsToTypes<Outputs>;
+
+        const newOutputs = this._callback(t, dt, prevInputs, prevOutputs, newInputs);
+
+        this.outputPorts.forEach((p, i) => { p.SetValue(newOutputs[i]); });
+        this.inputPorts.forEach((p, i) => { p.SetValue(newInputs[i]); });
+    }
 
     public ToStorage(): BlockStorageWithIDType<Inputs, Outputs> {
         return {
@@ -162,7 +207,7 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
             tags: this.tags,
             inputPorts: this.inputPorts.map(p => p.ToStorage()) as never as MapStringsToPortStoragesWithIDType<Inputs>,
             outputPorts: this.outputPorts.map(p => p.ToStorage()) as never as MapStringsToPortStoragesWithIDType<Outputs>,
-            callbackString: this._callbackString
+            callbackString: this.callbackString
         }
     }
 }

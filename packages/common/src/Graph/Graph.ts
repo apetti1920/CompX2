@@ -11,7 +11,7 @@ export class Graph implements GraphStorageType, GraphObject<any> {
     public blocks: Block<any, any>[];
     public edges: Edge<any>[];
 
-    // Contructs a graph from storage
+    // Constructs a graph from storage
     public constructor(graph: GraphStorageType) {
         this.blocks = graph.blocks.map(bs => Block.InitializeFromStorageWithId(bs));
         this.edges = graph.edges.map(es => Edge.InitializeFromStorage(es));
@@ -20,6 +20,17 @@ export class Graph implements GraphStorageType, GraphObject<any> {
     // Function to add a block to the graph
     public AddBlock(block: BlockStorageType<any, any>): void {
         this.blocks.push(Block.InitializeFromStorage(block));
+    }
+
+    // Function to remove a block by id
+    public RemoveBlock(blockId: string): void | never {
+        const blockIndex = this.blocks.findIndex(b => b.id === blockId);
+        if (blockIndex === -1) throw new CompXError("warning",
+            "Block Removal Warning", `Block ${blockId} was not found`);
+
+        this.edges.splice(
+            this.edges.findIndex(e => e.output.blockID === blockId || e.input.blockID === blockId), 1)
+        this.blocks.splice(blockIndex, 1);
     }
 
     // Function To Add an edge to thee graph
@@ -74,6 +85,14 @@ export class Graph implements GraphStorageType, GraphObject<any> {
             input: { blockID: inputBlockId, portID: inputPortId },
             output: { blockID: outputBlockId, portID: outputPortId }
         }));
+    }
+
+    public RemoveEdge(edgeId: string): void | never {
+        const edgeIndex = this.edges.findIndex(e => e.id === edgeId);
+        if (edgeIndex === -1) throw new CompXError("warning",
+            "Edge Removal Warning", `Edge ${edgeId} was not found`);
+
+        this.edges.splice(edgeIndex, 1);
     }
 
     public ToStorage(): GraphStorageType {

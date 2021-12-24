@@ -1,5 +1,6 @@
 import {BlockStorageWithIDType, isBlockStorageWithIDType} from "./BlockStorage";
 import {EdgeStorageType, isEdgeStorageType} from "./EdgeStorage";
+import * as console from "console";
 
 export interface GraphStorageType {
     blocks: BlockStorageWithIDType<any, any>[],
@@ -15,5 +16,6 @@ export function isGraphStorageType(obj: any): obj is GraphStorageType {
     if (!Array.isArray(obj['blocks']) || !obj['blocks'].every(b => isBlockStorageWithIDType(b))) return false;
     if (!Array.isArray(obj['edges']) || !obj['edges'].every(b => isEdgeStorageType(b))) return false;
 
+    console.log("why is this not working");
     return true;
 }

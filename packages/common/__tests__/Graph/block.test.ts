@@ -3,7 +3,7 @@ import {
     BlockStorageWithIDType,
     isBlockStorageType, isBlockStorageWithIDType
 } from "../../src/Network/GraphItemStorage/BlockStorage";
-import {Block} from "../../src/Graph/Block";
+import { Block } from "../../src/Graph/Block";
 
 describe("Block Tests", () => {
     describe("Block Storage Tests", () => {
@@ -103,10 +103,10 @@ describe("Block Tests", () => {
         const testBlock2: BlockStorageType<["NUMBER"], ["NUMBER"]> = {
             name: "test", description: "a test block", tags: ['test'],
             inputPorts: [
-                { name: "test p 1", type: "NUMBER", initialValue: 0 }
+                { name: "p1", type: "NUMBER", initialValue: 0 }
             ],
             outputPorts: [
-                { name: "test p 2", type: "NUMBER", initialValue: 0 }
+                { name: "p2", type: "NUMBER", initialValue: 0 }
             ],
             callbackString: ""
         }
@@ -117,33 +117,32 @@ describe("Block Tests", () => {
             block = Block.InitializeFromStorage(testBlock2);
         });
 
-        // test("Callback Call Error", () => {
-        //     expect(()=>block.Execute(0, 0, [])).toThrowError();
-        // });
-
-        // test("Can Set Callback", () => {
-        //     expect(block.outputPorts[0].GetObjectValue()).toBe(0);
-        //
-        //     block.SetCallback(
-        //         (t, dt, prevInputs,
-        //          prevOutputs, newInputs
-        //     ) => {
-        //         return [prevOutputs[0] + 5];
-        //     });
-        //
-        //     for (let i = 0; i < 10; i++) {
-        //         block.Execute(i, 1, []);
-        //     }
-        //
-        //     expect(block.outputPorts[0].GetObjectValue()).toBe(50);
-        // });
-
         test("Change Input Port", () => {
             const b2 = block.ChangeInputPortType(0, "STRING");
             expect(b2.inputPorts[0].type).toBe("STRING");
 
             expect(() => block.ChangeInputPortType(1, "STRING")).toThrowError();
             expect(() => block.ChangeInputPortType(0, "NUMBER")).toThrowError();
+        });
+
+        test("Change Output Port", () => {
+            const b2 = block.ChangeOutputPortType(0, "STRING");
+            expect(b2.outputPorts[0].type).toBe("STRING");
+
+            expect(() => block.ChangeOutputPortType(1, "STRING")).toThrowError();
+            expect(() => block.ChangeOutputPortType(0, "NUMBER")).toThrowError();
+        });
+
+        test("Can Set Callback", () => {
+            expect(() => block.Execute(0, 0.1, [5])).toThrowError();
+            expect(() => block.SetCallback("return [prevInputs[test] + 5]")).toThrowError();
+            expect(() => block.SetCallback("return [prevOutputs[test] + 5]")).toThrowError();
+            expect(() => block.SetCallback("return [inputPort[test] + 5]")).toThrowError();
+            expect(() => block.SetCallback("return [inputPort[p1 + 5]")).toThrowError();
+
+            block.SetCallback("return [inputPort[p1] + prevOutputs[p2] + prevInputs[p1] + 5]");
+            block.Execute(0, 0.1, [5])
+            expect(block.outputPorts[0].GetObjectValue()).toBe(10);
         });
     });
 });
