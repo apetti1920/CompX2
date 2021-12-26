@@ -90,21 +90,21 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
 
     // Converts a callback string to a callback
     private ConvertCallback(callbackStr: string): Callback<Inputs, Outputs> | never {
-        let callbackString = callbackStr.replace(new RegExp("prevInputs\\[(\\w+)\\]","gm"), (a, b) => {
+        let convertCallbackString = callbackStr.replace(new RegExp("prevInput\\[(\\w+)\\]","gm"), (a, b) => {
             const index = this.inputPorts.map(port => port.name).indexOf(b);
             if (index === -1)
                 throw new CompXError("error", `Conversion Error`, `Previnputs ${b} not found`)
             return `prevInputs[${index}]`;
         });
 
-        callbackString = callbackString.replace(new RegExp("prevOutputs\\[(\\w+)\\]","gm"), (a, b) => {
+        convertCallbackString = convertCallbackString.replace(new RegExp("prevOutput\\[(\\w+)\\]","gm"), (a, b) => {
             const index = this.outputPorts.map(port => port.name).indexOf(b);
             if (index === -1)
                 throw new CompXError("error", `Conversion Error`, `Prevoutputs ${b} not found`)
             return `prevOutputs[${index}]`;
         });
 
-        callbackString = callbackString.replace(new RegExp("inputPort\\[(\\w+)\\]","gm"), (a, b) => {
+        convertCallbackString = convertCallbackString.replace(new RegExp("inputPort\\[(\\w+)\\]","gm"), (a, b) => {
             const index = this.inputPorts.map((port) => port.name).indexOf(b);
             if (index === -1)
                 throw new CompXError("error", `Conversion Error`, `Input port ${b} not found`)
@@ -119,20 +119,18 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
         //     return `if (displayData !== undefined) {displayData["${this.id}"]=${b}}`;
         // });
 
-        callbackString = `try{${callbackString}}catch(err){console.log(err);}`
+        convertCallbackString = `try{${convertCallbackString}}catch(err){console.log(err);}`
 
         try {
-            return new Function("t", "dt", "prevInputs", "prevOutputs", "newInputs", "displayData", callbackString)
+            return new Function("t", "dt", "prevInputs", "prevOutputs", "newInputs", "displayData", convertCallbackString)
                 .bind(this);
         } catch (syntaxError: any) {
-            console.error("illegal code; syntax errors: ", syntaxError);
-            console.info(syntaxError.name ,"-", syntaxError.message);
-            throw syntaxError;
+            throw new CompXError("error", "Callback Conversion Syntax Error", syntaxError.message)
         }
     }
 
     public SetCallback(callbackStr: string): void | never {
-        this._callback = this.ConvertCallback(callbackStr);
+        this._callback = callbackStr!==""?this.ConvertCallback(callbackStr):undefined;
         this.callbackString = callbackStr;
     }
 

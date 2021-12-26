@@ -135,12 +135,12 @@ describe("Block Tests", () => {
 
         test("Can Set Callback", () => {
             expect(() => block.Execute(0, 0.1, [5])).toThrowError();
-            expect(() => block.SetCallback("return [prevInputs[test] + 5]")).toThrowError();
-            expect(() => block.SetCallback("return [prevOutputs[test] + 5]")).toThrowError();
+            expect(() => block.SetCallback("return [prevInput[test] + 5]")).toThrowError();
+            expect(() => block.SetCallback("return [prevOutput[test] + 5]")).toThrowError();
             expect(() => block.SetCallback("return [inputPort[test] + 5]")).toThrowError();
             expect(() => block.SetCallback("return [inputPort[p1 + 5]")).toThrowError();
 
-            block.SetCallback("return [inputPort[p1] + prevOutputs[p2] + prevInputs[p1] + 5]");
+            block.SetCallback("return [inputPort[p1] + prevOutput[p2] + prevInput[p1] + 5]");
             block.Execute(0, 0.1, [5])
             expect(block.outputPorts[0].GetObjectValue()).toBe(10);
         });

@@ -6,8 +6,9 @@ import { BlockStorageType } from "../Network/GraphItemStorage/BlockStorage";
 import {Block} from "./Block";
 import {Edge} from "./Edge";
 import {CompXError} from "../Helpers/ErrorHandling";
+import {PortStringListType} from "./Port";
 
-export class Graph implements GraphStorageType, GraphObject<any> {
+export class Graph implements GraphStorageType, GraphObject<Graph> {
     public blocks: Block<any, any>[];
     public edges: Edge<any>[];
 
@@ -18,8 +19,10 @@ export class Graph implements GraphStorageType, GraphObject<any> {
     }
 
     // Function to add a block to the graph
-    public AddBlock(block: BlockStorageType<any, any>): void {
-        this.blocks.push(Block.InitializeFromStorage(block));
+    public AddBlock(block: BlockStorageType<PortStringListType, PortStringListType>): string {
+        const newBlock = Block.InitializeFromStorage(block);
+        this.blocks.push(newBlock);
+        return newBlock.id;
     }
 
     // Function to remove a block by id
@@ -35,13 +38,13 @@ export class Graph implements GraphStorageType, GraphObject<any> {
 
     // Function To Add an edge to thee graph
     public AddEdge(outputBlockId: string, outputPortId: string,
-                   inputBlockId: string, inputPortId: string): void | never
+                   inputBlockId: string, inputPortId: string): string | never
     {
         // Check if this edge already exists
-        if (this.edges.findIndex(e => e.output.blockID === outputBlockId &&
+        const foundInd = this.edges.find(e => e.output.blockID === outputBlockId &&
             e.output.portID === outputPortId && e.input.blockID === inputBlockId &&
-            e.input.portID === inputPortId) !== -1
-        ) return;
+            e.input.portID === inputPortId);
+        if (foundInd !== undefined) return foundInd.id;
 
         // Check if the output block exists
         const outputBlockIndex = this.blocks.findIndex(b => b.id === outputBlockId);
@@ -67,7 +70,7 @@ export class Graph implements GraphStorageType, GraphObject<any> {
             throw new CompXError(
                 "warning", "Add Edge Warning", `Input port ${inputPortId} not found`);
 
-        // Check if the port types are compatable
+        // Check if the port types are compatible
         if (this.blocks[outputBlockIndex].outputPorts[outputPortIndex].type !==
             this.blocks[inputBlockIndex].inputPorts[inputPortIndex].type)
             throw new CompXError(
@@ -78,21 +81,57 @@ export class Graph implements GraphStorageType, GraphObject<any> {
                 (${this.blocks[inputBlockIndex].inputPorts[inputPortIndex].type})`
             );
 
+        // Check that only one edge goes to any input
+        if (this.edges.findIndex(e => e.input.blockID === inputBlockId && e.input.portID === inputPortId) !== -1)
+            throw new CompXError(
+                "warning",
+                "Edge Add Warning",
+                "More than one  edge can not go to the same input port"
+            )
+
         // Add the edge
-        this.edges.push(Edge.InitializeFromStorage({
+        const newEdge = Edge.InitializeFromStorage({
             id: uuid(),
             type: this.blocks[outputPortIndex].outputPorts[outputPortIndex].type,
             input: { blockID: inputBlockId, portID: inputPortId },
             output: { blockID: outputBlockId, portID: outputPortId }
-        }));
+        });
+        this.edges.push(newEdge);
+        return newEdge.id;
     }
 
+    // Function to remove an edge from the graph
     public RemoveEdge(edgeId: string): void | never {
         const edgeIndex = this.edges.findIndex(e => e.id === edgeId);
         if (edgeIndex === -1) throw new CompXError("warning",
             "Edge Removal Warning", `Edge ${edgeId} was not found`);
 
         this.edges.splice(edgeIndex, 1);
+    }
+
+    // Gets the source blocks in the graph (Outputs only)
+    public getSourceBlocks(): string[] {
+        return this.blocks.filter(b => b.inputPorts.length === 0).map(b => b.id);
+    }
+
+    // Gets all sink blocs in the graph (Inputs only)
+    public getSinkBlocks(): string[] {
+        return this.blocks.filter(b => b.outputPorts.length === 0).map(b => b.id);
+    }
+
+    // A depth first search of the graph
+    // public DFS(startBlock: string): string[] {
+    //     const visited: boolean[] = Array(this.blocks.length);
+    //
+    // }
+
+    // Gets all blocks connected to the output of a block
+    public getAdjacentBlocks(blockId: string): string[] {
+        return this.edges.filter(e => e.output.blockID === blockId)
+            .map(e => {
+                const tmpB = this.blocks.find(b => b.id === e.input.blockID)!
+                return tmpB.id
+            });
     }
 
     public ToStorage(): GraphStorageType {
