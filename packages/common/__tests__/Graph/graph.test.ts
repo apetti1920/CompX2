@@ -94,7 +94,7 @@ describe("Graph Tests", () => {
                         { type: "STRING", initialValue: "", name: "6ia"}
                     ], inputPorts: []
                 });
-                expect(() => graph.AddEdge("1", "1oa", b1, "6ia"))
+                expect(() => graph.AddEdge("1", "1oa", b1, graph.blocks.find(b => b.id === b1)!.outputPorts[0].id))
                     .toThrowError()
             });
 
@@ -110,7 +110,7 @@ describe("Graph Tests", () => {
                     outputPorts: [],
                     callbackString: ""
                 });
-                graph.AddEdge("1", "1ia", id, "6ia");
+                graph.AddEdge("1", "1", id, graph.blocks.find(b => b.id === id)!.inputPorts[0].id);
                 expect(graph.edges.length).toBe(graphStorage.edges.length + 1);
             });
 
@@ -118,7 +118,7 @@ describe("Graph Tests", () => {
                 expect(() => graph.RemoveEdge("test")).toThrowError();
 
                 graph.RemoveEdge(graph.edges[0].id);
-                expect(graph.edges.length).toBe(0)
+                expect(graph.edges.length).toBe(graphStorage.edges.length - 1)
             });
         });
 
@@ -128,19 +128,42 @@ describe("Graph Tests", () => {
 
        describe("Graph Theory Tests", () => {
            test("Get Adjacent Blocks", () => {
-               const adjBlocks = graph.getAdjacentBlocks("3");
+               const adjBlocks = graph.GetAdjacentBlocks("3");
                expect(adjBlocks).toContain("4");
                expect(adjBlocks).toContain("5");
            });
 
            test("Get Source Blocks", () => {
-               const sources = graph.getSourceBlocks();
+               const sources = graph.GetSourceBlocks();
                expect(sources).toEqual(["1"]);
            });
 
            test("Get Sink Blocks", () => {
-               const sinks = graph.getSinkBlocks();
+               const sinks = graph.GetSinkBlocks();
                expect(sinks).toContain("5");
+           });
+
+           test("DFS Tests", () => {
+               const dfs = graph.DFS("3");
+               expect(dfs).toEqual(['3', '4', '2', '5'])
+           });
+
+           test("Edge Classifier", () => {
+               const edgeTypes = graph.ClassifyEdges();
+               expect(edgeTypes['1']).toBe("TREE");
+               expect(edgeTypes['2']).toBe("TREE");
+               expect(edgeTypes['3']).toBe("TREE");
+               expect(edgeTypes['4']).toBe("BACK");
+               expect(edgeTypes['5']).toBe("TREE");
+           });
+
+           test("Strongly Connected Components", () => {
+               const scc = graph.SCC();
+               expect(scc[0]).toContain("1");
+               expect(scc[1]).toContain("2");
+               expect(scc[1]).toContain("3");
+               expect(scc[1]).toContain("4");
+               expect(scc[2]).toContain("5");
            });
        });
    });

@@ -37,7 +37,9 @@ interface TempIOsWithIDType<Inputs extends PortStringListType, Outputs extends P
     inputPorts: MapStringsToPortStoragesWithIDType<Inputs>, outputPorts: MapStringsToPortStoragesWithIDType<Outputs>
 }
 export interface BlockStorageWithIDType<Inputs extends PortStringListType, Outputs extends PortStringListType>
-    extends WithID, Omit<BlockStorageType<Inputs, Outputs>, "inputPorts" | "outputPorts">, TempIOsWithIDType<Inputs, Outputs> {}
+    extends WithID, Omit<BlockStorageType<Inputs, Outputs>, "inputPorts" | "outputPorts">,
+        TempIOsWithIDType<Inputs, Outputs> {}
+
 export function isBlockStorageWithIDType<
     Inputs extends PortStringListType,
     Outputs extends PortStringListType>(obj: any): obj is BlockStorageWithIDType<Inputs, Outputs>

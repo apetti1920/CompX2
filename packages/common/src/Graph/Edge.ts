@@ -2,6 +2,9 @@ import { EdgePointType, EdgeStorageType } from "../Network/GraphItemStorage/Edge
 import {PortTypes} from "./Port";
 import {GraphObject} from "./GraphObjectBase";
 
+const EdgeTypesStringList = ["TREE", "BACK", "FORWARD", "CROSS"] as const;
+export type EdgeTypes = typeof EdgeTypesStringList[number];
+
 export class Edge<U extends keyof PortTypes> implements EdgeStorageType<U>, GraphObject<Edge<U>>{
     public readonly id: string;
     public type: U;

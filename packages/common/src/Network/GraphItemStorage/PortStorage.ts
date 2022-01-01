@@ -19,7 +19,7 @@ export function isPortStorageType<U extends keyof PortTypes>(obj: any): obj is P
         !PortTypesStringList.includes(obj['type'] as typeof PortTypesStringList[number])
     ) return false;
 
-    if("initialValue" in obj) {
+    if("initialValue" in obj && obj["initialValue"] !== undefined) {
         switch (obj['type'] as typeof PortTypesStringList[number]) {
             case ("STRING"): {
                 if (typeof obj['initialValue'] !== 'string') return false;

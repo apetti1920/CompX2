@@ -50,6 +50,6 @@
     {"id": "2", "type": "NUMBER", "output": {"blockID": "2", "portID": "2oa"}, "input": {"blockID": "3", "portID": "3ia"}},
     {"id": "3", "type": "NUMBER", "output": {"blockID": "3", "portID": "3oa"}, "input": {"blockID": "4", "portID": "4ia"}},
     {"id": "4", "type": "NUMBER", "output": {"blockID": "4", "portID": "4oa"}, "input": {"blockID": "2", "portID": "2ib"}},
-    {"id": "4", "type": "NUMBER", "output": {"blockID": "4", "portID": "4oa"}, "input": {"blockID": "5", "portID": "5ia"}}
+    {"id": "5", "type": "NUMBER", "output": {"blockID": "3", "portID": "3oa"}, "input": {"blockID": "5", "portID": "5ia"}}
   ]
 }
