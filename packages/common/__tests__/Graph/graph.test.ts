@@ -135,7 +135,8 @@ describe("Graph Tests", () => {
 
            test("Get Source Blocks", () => {
                const sources = graph.GetSourceBlocks();
-               expect(sources).toEqual(["1"]);
+               expect(sources).toContain("1");
+               expect(sources).toContain("3");
            });
 
            test("Get Sink Blocks", () => {
@@ -164,6 +165,15 @@ describe("Graph Tests", () => {
                expect(scc[1]).toContain("3");
                expect(scc[1]).toContain("4");
                expect(scc[2]).toContain("5");
+           });
+
+           test("Is valid Graph", () => {
+              expect(graph.isValidGraph()).toBeTruthy();
+           });
+
+           test("Get Compile Order", () => {
+               const compOrder = graph.GetBlockCompileOrder();
+               expect(compOrder).toEqual(["1", "3", "4", "5", "2"]);
            });
        });
    });

@@ -33,6 +33,11 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
     public outputPorts: MapStringsToPortsType<Outputs>;
     public callbackString: string;
     private _callback?: Callback<Inputs, Outputs>;
+    private _isPseudoSource?: boolean;
+
+    public isPseudoSource(): boolean {
+        return this._isPseudoSource ?? false
+    }
 
     // hide the constructor from view
     private constructor(name: string, description: string, tags: string[],
@@ -49,6 +54,7 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
         this.outputPorts =
             outputPorts.map(i => Port.InitializeFromStorage(i, this.id)) as unknown as MapStringsToPortsType<Outputs>;
         this.callbackString = callbackString;
+        this.SetCallback(callbackString);
     }
 
     //initialize a block from a storage object
@@ -89,8 +95,10 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
     }
 
     // Converts a callback string to a callback
-    private ConvertCallback(callbackStr: string): Callback<Inputs, Outputs> | never {
+    private ConvertCallback(callbackStr: string): [Callback<Inputs, Outputs>, boolean] | never {
+        let isPseudoSource = false;
         let convertCallbackString = callbackStr.replace(new RegExp("prevInput\\[(\\w+)\\]","gm"), (a, b) => {
+            isPseudoSource = true;
             const index = this.inputPorts.map(port => port.name).indexOf(b);
             if (index === -1)
                 throw new CompXError("error", `Conversion Error`, `Previnputs ${b} not found`)
@@ -98,6 +106,7 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
         });
 
         convertCallbackString = convertCallbackString.replace(new RegExp("prevOutput\\[(\\w+)\\]","gm"), (a, b) => {
+            isPseudoSource = true;
             const index = this.outputPorts.map(port => port.name).indexOf(b);
             if (index === -1)
                 throw new CompXError("error", `Conversion Error`, `Prevoutputs ${b} not found`)
@@ -122,16 +131,22 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
         convertCallbackString = `try{${convertCallbackString}}catch(err){console.log(err);}`
 
         try {
-            return new Function("t", "dt", "prevInputs", "prevOutputs", "newInputs", "displayData", convertCallbackString)
-                .bind(this);
+            return [new Function("t", "dt", "prevInputs", "prevOutputs", "newInputs", "displayData", convertCallbackString)
+                .bind(this), isPseudoSource];
         } catch (syntaxError: any) {
             throw new CompXError("error", "Callback Conversion Syntax Error", syntaxError.message)
         }
     }
 
     public SetCallback(callbackStr: string): void | never {
-        this._callback = callbackStr!==""?this.ConvertCallback(callbackStr):undefined;
-        this.callbackString = callbackStr;
+        if (callbackStr !== "") {
+            let [convertCallback, isPseudoSource] = this.ConvertCallback(callbackStr);
+            this._callback = convertCallback;
+            this.callbackString = callbackStr;
+            this._isPseudoSource = isPseudoSource;
+        } else {
+            return undefined
+        }
     }
 
     public ChangeInputPortType<I extends number, U extends keyof PortTypes>(

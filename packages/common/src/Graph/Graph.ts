@@ -113,7 +113,7 @@ export class Graph implements GraphStorageType, GraphObject<Graph> {
 
     // Gets the source blocks in the graph (Outputs only)
     public GetSourceBlocks(): string[] {
-        return this.blocks.filter(b => b.inputPorts.length === 0).map(b => b.id);
+        return this.blocks.filter(b => b.inputPorts.length === 0 || b.isPseudoSource()).map(b => b.id);
     }
 
     // Gets all sink blocs in the graph (Inputs only)
@@ -234,6 +234,7 @@ export class Graph implements GraphStorageType, GraphObject<Graph> {
             const tmpBlock = Object.assign({}, block);
             tmpBlock.inputPorts = block.outputPorts;
             tmpBlock.outputPorts = block.inputPorts;
+            tmpBlock.callbackString = "";
 
             return tmpBlock;
         });
@@ -307,6 +308,40 @@ export class Graph implements GraphStorageType, GraphObject<Graph> {
         });
 
         return retVar;
+    }
+
+    // Checks if the graph has at least one source block in each strongly connected group\
+    public isValidGraph(): boolean {
+        const groups = this.SCC();
+        const sources = this.GetSourceBlocks();
+        const sinks = this.GetSinkBlocks();
+
+        // checks if each group contians atleast one source or pseudo source
+        const reducer = (accumulator: boolean, item: string[]) => {
+            return accumulator && (item.filter(value => sources.concat(...sinks).includes(value)).length > 0);
+        };
+
+        return groups.reduce(reducer, true);
+    }
+
+    // Gets the compile order the graph has to follow to execute
+    public GetBlockCompileOrder(): string[] {
+        const sources = this.GetSourceBlocks();
+        const compileOrder: string[] = [];
+        const filledInputs = this.blocks.map(b => ({bId: b.id, inputsLeft: b.inputPorts.length}));
+
+        sources.forEach(source => {
+            if (!compileOrder.includes(source)) compileOrder.push(source);
+            this.GetAdjacentBlocks(source).flatMap(adjBlock => this.DFS(adjBlock))
+                .filter(dfsBlock => !compileOrder.includes(dfsBlock))
+                .map(dfsBlock => filledInputs.findIndex(b => b.bId === dfsBlock))
+                .forEach(filledInd => {
+                    filledInputs[filledInd].inputsLeft -= 1;
+                    if (filledInputs[filledInd].inputsLeft === 0) compileOrder.push(filledInputs[filledInd].bId);
+                });
+        });
+
+        return compileOrder;
     }
 
     // Create a graph storage object
