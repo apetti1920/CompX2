@@ -1,5 +1,4 @@
 import { v4 as uuidV4 } from 'uuid';
-import { CompXError } from "../Helpers/ErrorHandling";
 import {PortStorageType, PortStorageWithIDType} from "../Network/GraphItemStorage/PortStorage";
 import { GraphObject } from "./GraphObjectBase";
 
@@ -49,11 +48,7 @@ export class Port<U extends keyof PortTypes> implements PortStorageType<U>, Grap
         if (this._objectValue !== undefined)
             return this._objectValue;
         else
-            throw new CompXError(
-                "warning",
-                "Port Get Value Warning",
-                "The Ports value has not been defined"
-            )
+            return PortTypeInitializers[this.type];
     }
 
     // function to set the value of the port

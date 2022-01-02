@@ -175,6 +175,10 @@ describe("Graph Tests", () => {
                const compOrder = graph.GetBlockCompileOrder();
                expect(compOrder).toEqual(["1", "3", "4", "5", "2"]);
            });
+
+           test("Execute Test", () => {
+               graph.Execute(1, 0.001);
+           });
        });
    });
 });

@@ -208,8 +208,8 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
 
         const newOutputs = this._callback(t, dt, prevInputs, prevOutputs, newInputs);
 
-        this.outputPorts.forEach((p, i) => { p.SetValue(newOutputs[i]); });
-        this.inputPorts.forEach((p, i) => { p.SetValue(newInputs[i]); });
+        this.outputPorts.forEach((p, i) => this.outputPorts[i].SetValue(newOutputs[i]));
+        this.inputPorts.forEach((p, i) => this.inputPorts[i].SetValue(newInputs[i]));
     }
 
     public ToStorage(): BlockStorageWithIDType<Inputs, Outputs> {

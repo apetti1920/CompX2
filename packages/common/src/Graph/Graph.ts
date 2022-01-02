@@ -326,12 +326,22 @@ export class Graph implements GraphStorageType, GraphObject<Graph> {
 
     // Gets the compile order the graph has to follow to execute
     public GetBlockCompileOrder(): string[] {
-        const sources = this.GetSourceBlocks();
+        // Initialize the compile order return variable
         const compileOrder: string[] = [];
+
+        // Initialize an array to hold the id of a variable and the number of inputs that have not been convered
         const filledInputs = this.blocks.map(b => ({bId: b.id, inputsLeft: b.inputPorts.length}));
 
-        sources.forEach(source => {
+        // loop through each of the source blocks
+        this.GetSourceBlocks().forEach(source => {
+            // push the source to the comp order if not already pushed
             if (!compileOrder.includes(source)) compileOrder.push(source);
+
+            // get a map of all the blocks in dfs order from each source block then filter it to remove
+            // variables already included in the comp order
+            // map each of these blocks to their respective index in the filled input array
+            // finally loop throough each index and subtract 1 from the array
+            // if the inputs left reaches 0 add it to the compile order
             this.GetAdjacentBlocks(source).flatMap(adjBlock => this.DFS(adjBlock))
                 .filter(dfsBlock => !compileOrder.includes(dfsBlock))
                 .map(dfsBlock => filledInputs.findIndex(b => b.bId === dfsBlock))
@@ -342,6 +352,34 @@ export class Graph implements GraphStorageType, GraphObject<Graph> {
         });
 
         return compileOrder;
+    }
+
+    // Executes the current graph
+    public Execute(T: number | "infinite", dt: number): void {
+        let t = 0.0;
+
+        const blockCompOrder = this.GetBlockCompileOrder();
+
+        const executeFunc = () => {
+            blockCompOrder.forEach(bId => {
+                const block = this.blocks.find(b => b.id == bId)!;
+                const newInputs = block.inputPorts.map(inputPort => {
+                    const edge = this.edges.find(e => e.input.blockID === bId && e.input.portID === inputPort.name)!;
+                    const outputBlock = this.blocks.find(b => b.id === edge.output.blockID)!;
+                    const outputPort = outputBlock.outputPorts.find(p => p.name === edge.output.portID)!;
+                    return outputPort.GetObjectValue();
+                });
+
+                block.Execute(t, dt, newInputs);
+            });
+        }
+
+        if (T!=="infinite") {
+            while (t < T+dt) {
+                executeFunc();
+                t += dt;
+            }
+        }
     }
 
     // Create a graph storage object

@@ -22,9 +22,9 @@
         {"id": "1", "name": "3oa", "type": "NUMBER"}
       ],
       "inputPorts": [
-        {"id": "1", "name": "3ia", "type": "NUMBER"}
+        { "id": "1", "name": "3ia", "type": "NUMBER", "initialValue": 0 }
       ],
-      "callbackString": "return [dt*((t===0.0?inputPort[3ia].initialValue:prevInput[3ia]) + inputPort[3ia])/2]"
+      "callbackString": "return [dt*(prevInput[3ia] + inputPort[3ia])/2]"
     },
     { "id": "4", "name": "gain1", "description": "", "tags": [],
 
@@ -42,7 +42,7 @@
       "inputPorts": [
         {"id": "1", "name": "5ia", "type": "NUMBER"}
       ],
-      "callbackString": "return [print(inputPort[5ia])]"
+      "callbackString": "return [console.log(inputPort[5ia])]"
     }
   ],
   "edges": [
