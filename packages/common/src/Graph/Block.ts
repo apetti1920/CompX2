@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import {BlockStorageType, BlockStorageWithIDType} from "../Network/GraphItemStorage/BlockStorage";
 import {PortStorageType, PortStorageWithIDType} from "../Network/GraphItemStorage/PortStorage";
-import {Port, PortStringListType, PortTypes} from "./Port";
+import {Port, PortStringListType, PortTypeInitializers, PortTypes} from "./Port";
 import {v4 as uuidV4} from "uuid";
 import {CompXError} from "../Helpers/ErrorHandling";
 import {GraphObject} from "./GraphObjectBase";
@@ -111,6 +111,15 @@ export class Block<Inputs extends PortStringListType, Outputs extends PortString
             if (index === -1)
                 throw new CompXError("error", `Conversion Error`, `Prevoutputs ${b} not found`)
             return `prevOutputs[${index}]`;
+        });
+
+        convertCallbackString = convertCallbackString.replace(new RegExp("initialCondition\\[(\\w+)\\]","gm"), (a, b) => {
+            const index = this.outputPorts.map(port => port.name).indexOf(b);
+            if (index === -1)
+                throw new CompXError("error", `Conversion Error`, `Initial Condition ${b} not found`)
+
+            const ic = this.outputPorts[index].initialValue??PortTypeInitializers[this.outputPorts[index].type];
+            return ic.toString();
         });
 
         convertCallbackString = convertCallbackString.replace(new RegExp("inputPort\\[(\\w+)\\]","gm"), (a, b) => {

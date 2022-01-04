@@ -332,6 +332,8 @@ export class Graph implements GraphStorageType, GraphObject<Graph> {
         // Initialize an array to hold the id of a variable and the number of inputs that have not been convered
         const filledInputs = this.blocks.map(b => ({bId: b.id, inputsLeft: b.inputPorts.length}));
 
+        this.GetSinkBlocks()
+
         // loop through each of the source blocks
         this.GetSourceBlocks().forEach(source => {
             // push the source to the comp order if not already pushed
@@ -351,32 +353,61 @@ export class Graph implements GraphStorageType, GraphObject<Graph> {
                 });
         });
 
+        // Move all sinks to the end of the compile order
+        this.GetSinkBlocks().forEach(sink => {
+            // Get the index of the sink
+            const sinkInd = compileOrder.indexOf(sink);
+
+            if (sinkInd > -1) {
+                // Remove the sink from the compile order
+                compileOrder.splice(sinkInd, 1);
+
+                // push it to the end of the list
+                compileOrder.push(sink);
+            }
+        });
+
         return compileOrder;
     }
 
     // Executes the current graph
     public Execute(T: number | "infinite", dt: number): void {
+        // Set the simulation time to 0.0 time
         let t = 0.0;
 
+        // Get the compile order the blocks need to be in
         const blockCompOrder = this.GetBlockCompileOrder();
 
+        // Create an anonomous function to set up each simulation loop
         const executeFunc = () => {
+            // for each block in the ccompile order
             blockCompOrder.forEach(bId => {
+                // Get the block
                 const block = this.blocks.find(b => b.id == bId)!;
+
+                // Loop through the block's inputs to find their corresponding output values
                 const newInputs = block.inputPorts.map(inputPort => {
+                    // Get the edge to connect the block to its corresponding output block and port
                     const edge = this.edges.find(e => e.input.blockID === bId && e.input.portID === inputPort.name)!;
                     const outputBlock = this.blocks.find(b => b.id === edge.output.blockID)!;
                     const outputPort = outputBlock.outputPorts.find(p => p.name === edge.output.portID)!;
+
+                    // return the output value for that port
                     return outputPort.GetObjectValue();
                 });
 
+                // execute the block with these new inputs
                 block.Execute(t, dt, newInputs);
             });
         }
 
+        // if the execution has not been set to execution mode
         if (T!=="infinite") {
+            // loop until the sim time has exceeded the end time
             while (t < T+dt) {
                 executeFunc();
+
+                // Add the delta time to the simulation time
                 t += dt;
             }
         }

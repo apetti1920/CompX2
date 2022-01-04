@@ -8,7 +8,7 @@ describe("Graph Tests", () => {
     let json: any;
     let graphStorage: GraphStorageType
     beforeAll(() => {
-        json =  JSON.parse(fs.readFileSync(path.join(__dirname, "..", "Resources", "TestGraph.json"),
+        json =  JSON.parse(fs.readFileSync(path.join(__dirname, "..", "Resources", "TestGraphLoop1.json"),
             {encoding:'utf8', flag:'r'}));
     });
 
@@ -173,11 +173,16 @@ describe("Graph Tests", () => {
 
            test("Get Compile Order", () => {
                const compOrder = graph.GetBlockCompileOrder();
-               expect(compOrder).toEqual(["1", "3", "4", "5", "2"]);
+               expect(compOrder).toEqual(["1", "3", "4", "2", "5"]);
            });
 
            test("Execute Test", () => {
-               graph.Execute(1, 0.001);
+               const json2 =  JSON.parse(fs.readFileSync(path.join(__dirname, "..", "Resources", "TestGraphLoop2.json"),
+                   {encoding:'utf8', flag:'r'}));
+               if (isGraphStorageType(json2)) {
+                   const graph = new Graph(json2);
+                   graph.Execute(10, 0.01)
+               }
            });
        });
    });
