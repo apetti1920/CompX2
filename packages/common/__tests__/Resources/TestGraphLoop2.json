@@ -71,7 +71,7 @@
       "inputPorts": [
         {"id": "1", "name": "8ia", "type": "NUMBER"}
       ],
-      "callbackString": "return [console.log(inputPort[8ia])]"
+      "callbackString": "return [/*console.log(inputPort[8ia])*/]"
     },
     { "id": "9", "name": "sub1", "description": "", "tags": [],
       "outputPorts": [

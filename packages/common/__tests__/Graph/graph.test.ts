@@ -181,7 +181,8 @@ describe("Graph Tests", () => {
                    {encoding:'utf8', flag:'r'}));
                if (isGraphStorageType(json2)) {
                    const graph = new Graph(json2);
-                   graph.Execute(10, 0.01)
+
+                   graph.Execute(10, 0.01);
                }
            });
        });

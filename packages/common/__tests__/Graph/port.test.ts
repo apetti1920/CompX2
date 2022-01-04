@@ -6,6 +6,7 @@ import {
     isPortStorageWithIDType, PortStorageWithIDType
 } from "../../src/Network/GraphItemStorage/PortStorage";
 import {Port} from "../../src/Graph/Port";
+import {PortTypeInitializers} from "../../dist/Graph/Port";
 
 // Tests port features
 describe("Port Tests", () => {
@@ -79,9 +80,9 @@ describe("Port Tests", () => {
     });
 
     // test if an uninitialized port throws an error when accessing its value
-    test("Initialized port error", () => {
+    test("Initialized port not defined", () => {
         const portStorage: PortStorageType<"NUMBER"> = { name: "p1", type: "NUMBER"};
         const port = Port.InitializeFromStorage(portStorage, "1");
-        expect(()=>port.GetObjectValue()).toThrow("The Ports value has not been defined");
+        expect(port.GetObjectValue()).toBe(PortTypeInitializers[port.type]);
     });
 });
