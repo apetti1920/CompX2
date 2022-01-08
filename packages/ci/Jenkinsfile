@@ -6,7 +6,7 @@ pipeline {
             when {
                 allOf {
                     expression{ env.BRANCH_NAME ==~ /trunc-\w+-\d+/ }
-                    changeset "**/packages/common/*.*"
+                    changeset "**/common/*.*"
                 }
             }
             stages {
