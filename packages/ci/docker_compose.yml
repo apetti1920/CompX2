@@ -17,6 +17,7 @@ services:
     user: root
     volumes:
       - "jenkins_home:/var/jenkins_home"
+      - "/Users/apettti1920/Documents/GitHub/CompX2/CompX:/mnt/repo_data"
     ports:
       - "8080:8080"
     environment:
