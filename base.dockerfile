@@ -6,7 +6,7 @@ ADD package.json ./
 
 RUN npm install
 
-COPY packages ./
-ADD jest.config.ts lerna.json tsconfig.json ./
+COPY packages ./packages
+COPY jest.config.ts lerna.json tsconfig.json ./
 
 CMD tail -f /dev/null
