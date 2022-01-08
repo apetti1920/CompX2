@@ -18,8 +18,8 @@ pipeline {
                 stage ("Test Common") {
                     steps {
                         echo "Starting Tests"
-//                         sh 'docker build -t common_test -f packages/common/__tests__/test.common.dockerfile .'
-//                         sh 'docker run common_test'
+                        sh 'docker build -t common_test -f packages/common/__tests__/test.common.dockerfile .'
+                        sh 'docker run common_test'
                         echo "Finished Tests"
                     }
                 }
