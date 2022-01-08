@@ -3,14 +3,13 @@
   "version": "1.0.0",
   "description": "Common directory for CompX",
   "main": "src/index.ts",
-  "types": "dist/index.d.ts",
+  "publishConfig": {
+    "directory": "src"
+  },
   "scripts": {
     "build": "npx rimraf dist && npx tsc",
     "test": "jest"
   },
-  "files": [
-    "/dist"
-  ],
   "dependencies": {
     "uuid": "^8.3.2"
   },

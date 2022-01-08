@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import Container from "./container/Container";
+import Container from "./Container/Container";
 
 type PropType = {};
 type StateType = {};
