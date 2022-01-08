@@ -12,12 +12,10 @@ pipeline {
             stages {
                 stage ("Test Common") {
                     steps {
-                        dir("packages/common") {
-                            echo "Starting Tests"
-                            sh 'docker build -t common_test -f __tests__/Dockerfile .'
-                            sh 'docker run common_test'
-                            echo "Finished Tests"
-                        }
+                        echo "Starting Tests"
+                        sh 'docker build -t common_test -f packages/common/__tests__/test.common.dockerfile .'
+                        sh 'docker run common_test'
+                        echo "Finished Tests"
                     }
                 }
             }
