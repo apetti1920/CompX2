@@ -6,15 +6,18 @@ pipeline {
             when {
                 allOf {
                     expression { env.BRANCH_NAME ==~ /trunc-\w+-\d+/ }
-                    changeset "packages/common/src/**/*.*"
+//                     changeset "packages/common/src/**/*.*"
                 }
             }
             stages {
                 stage ("Test Common") {
                     steps {
-                        sh 'cd packages/common'
-                        sh 'docker build -t common_test -f __tests__/Dockerfile .'
-                        sh 'docker run common_test'
+                        dir("packages/common") {
+                            echo "Starting Tests"
+                            sh 'docker build -t common_test -f __tests__/Dockerfile .'
+                            sh 'docker run common_test'
+                            echo "Finished Tests"
+                        }
                     }
                 }
             }
