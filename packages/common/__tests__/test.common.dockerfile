@@ -1,8 +1,4 @@
-FROM node:14
-
-ADD . ./
-
-RUN npm install
+FROM base_node_folder
 
 WORKDIR ./packages/common
 

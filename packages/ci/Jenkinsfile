@@ -2,6 +2,11 @@ pipeline {
     agent any
 
     stages {
+        stages('Initialize Folder Image') {
+            steps {
+                sh 'docker build -t base_node_folder -f base.dockerfile .'
+            }
+        }
         stage('Common Pipeline') {
             when {
                 allOf {
