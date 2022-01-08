@@ -1,7 +1,10 @@
 FROM node:14
 
-COPY jest.config.ts package.json tsconfig.json ./
-ADD __tests__ src ./
+ADD . ./
+
+RUN npm install
+
+WORKDIR ./packages/common
 
 RUN npm install
 RUN npm run test --ci
