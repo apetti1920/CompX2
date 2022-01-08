@@ -5,8 +5,8 @@ pipeline {
         stage('Common Pipeline') {
             when {
                 allOf {
-                    expression{ env.BRANCH_NAME ==~ /trunc-\w+-\d+/ }
-                    changeset "**/common/*.*"
+                    expression { env.BRANCH_NAME ==~ /trunc-\w+-\d+/ }
+                    changeset "packages/common/**/*.*"
                 }
             }
             stages {
