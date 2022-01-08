@@ -12,9 +12,9 @@ pipeline {
             stages {
                 stage ("Test Common") {
                     steps {
-                        cd packages/common
-                        docker build -t common_test -f __tests__/Dockerfile .
-                        docker run common_test
+                        sh 'cd packages/common'
+                        sh 'docker build -t common_test -f __tests__/Dockerfile .'
+                        sh 'docker run common_test'
                     }
                 }
             }
