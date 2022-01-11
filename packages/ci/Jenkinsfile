@@ -18,9 +18,20 @@ pipeline {
                 stage ("Test Common") {
                     steps {
                         echo "Starting Tests"
-                        sh 'docker build -t common_test -f packages/common/__tests__/test.common.dockerfile .'
-                        sh 'docker run common_test'
+                        dir('packages/common') {
+                            sh 'docker build -t common_test -f __tests__/test.common.dockerfile .'
+                            sh 'container_id=$(docker run --rm -d common_test) && \
+                                docker cp $container_id:/compx/packages/common/__tests__/coverage common_coverage; \
+                                docker stop $container_id'
+                        }
                         echo "Finished Tests"
+                    }
+                }
+            }
+            post {
+                always {
+                    dir('packages/common') {
+                        archiveArtifacts artifacts: 'common_coverage/**/*.*'
                     }
                 }
             }
