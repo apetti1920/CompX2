@@ -11,8 +11,6 @@
   "author": "Aidan Petti",
   "license": "ISC",
   "devDependencies": {
-    "@types/jest": "^27.0.3",
-    "@types/lodash": "^4.14.178",
     "@types/node": "^16.11.7",
     "jest": "^27.4.0",
     "lerna": "^4.0.0",
