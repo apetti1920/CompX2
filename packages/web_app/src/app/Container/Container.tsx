@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import SplitPane from 'react-split-pane';
 
+import Canvas from './Canvas';
+
 import './Split.css'
 
 type PropType = {};
@@ -26,23 +28,23 @@ export default class Container extends Component<PropType, StateType> {
                     display: 'flex', flexFlow: "row nowrap"
                 }}>
                     {/* A wrapper sidebar on the left */}
-                    <div id="sidebar1-wrapper" style={{width: this.sidebar1Width, height: "100%", margin: 0}}/>
+                    <div id="sidebar1-wrapper" style={{width: this.sidebar1Width, height: "100%"}}/>
 
-                    <SplitPane defaultSize="20%" minSize="5%" maxSize="95%" split='vertical'>
+                    {/* Main Content Space */}
+                    <SplitPane defaultSize="20%" minSize="5%" maxSize="95%" split='vertical'
+                               style={{width: `calc(100% - ${this.sidebar1Width})`, height: "100%", position: "unset"}}>
                         {/*A wrapper for the resizable sidebar*/}
                         <div style={{width: "100%", height: "100%", backgroundColor: "blue"}}/>
 
                         {/*// A wrapper for the resizable main content area to the right of sidebar2*/}
                         <SplitPane defaultSize="75%" minSize="5%" maxSize="95%" split='horizontal'>
                             {/*// A wrapper for the canvas component*/}
-                            <div style={{width: "100%", height: "100%", backgroundColor: "red"}}/>
+                            <Canvas />
 
                             {/*// A wrapper for the terminal component*/}
                             <div style={{width: "100%", height: "100%", backgroundColor: "black"}}/>
                         </SplitPane>
                     </SplitPane>
-
-                    {/* A wrapper to the right of the sidebar */}
                 </div>
             </div>
         )
