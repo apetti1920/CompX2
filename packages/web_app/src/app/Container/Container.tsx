@@ -31,10 +31,11 @@ export default class Container extends Component<PropType, StateType> {
                     <div id="sidebar1-wrapper" style={{width: this.sidebar1Width, height: "100%"}}/>
 
                     {/* Main Content Space */}
-                    <SplitPane defaultSize="20%" minSize="5%" maxSize="95%" split='vertical'
+                    <SplitPane defaultSize="80%" minSize="5%" maxSize="95%" split='vertical' primary='second'
                                style={{width: `calc(100% - ${this.sidebar1Width})`, height: "100%", position: "unset"}}>
                         {/*A wrapper for the resizable sidebar*/}
-                        <div style={{width: "100%", height: "100%", backgroundColor: "blue"}}/>
+                        <div style={{width: "100%", height: "100%",
+                            backgroundColor: "blue", borderRadius: "10px", borderColor: 'black', borderWidth: "2px"}}/>
 
                         {/*// A wrapper for the resizable main content area to the right of sidebar2*/}
                         <SplitPane defaultSize="75%" minSize="5%" maxSize="95%" split='horizontal'>
@@ -42,7 +43,8 @@ export default class Container extends Component<PropType, StateType> {
                             <Canvas />
 
                             {/*// A wrapper for the terminal component*/}
-                            <div style={{width: "100%", height: "100%", backgroundColor: "black"}}/>
+                            <div style={{width: "100%", height: "100%", backgroundColor: "black",
+                                borderRadius: "10px", borderColor: 'black', borderWidth: "2px"}}/>
                         </SplitPane>
                     </SplitPane>
                 </div>

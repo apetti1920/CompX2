@@ -13,14 +13,22 @@ type StateType = {
 };
 
 export default class Container extends Component<PropType, StateType> {
+    private readonly canvasRef: React.MutableRefObject<SVGSVGElement | null>;
+
     constructor(props: PropType) {
         super(props);
+
+        this.canvasRef = React.createRef();
 
         this.state = {
             isMouseDownOnCanvas: false,
             canvasTranslation: { x: 0, y: 0 },
             canvasZoom: 1
         }
+    }
+
+    componentDidMount() {
+        this.center();
     }
 
     // Handles the state change when the mouse is pressed
@@ -82,10 +90,20 @@ export default class Container extends Component<PropType, StateType> {
         e.stopPropagation();
     };
 
+    // centers the canvas
+    center = () => {
+        if (this.canvasRef !== null &&  this.canvasRef.current !== null) {
+            const canvasWidth = this.canvasRef.current.clientWidth;
+            const canvasHeight = this.canvasRef.current.clientHeight;
+
+            this.setState({canvasTranslation: {x: canvasWidth/2.0, y: canvasHeight/2.0}})
+        }
+    }
+
     render() {
         return (
             // Creates an svg canvas to draw the elements on
-            <svg id="Canvas" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" pointerEvents="none">
+            <svg id="Canvas" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" ref={this.canvasRef}>
                 {/* The background is used to handle the mouse events on the canvas */}
                 <rect id="CanvasBackground" width="100%" height="100%" pointerEvents="auto" opacity={0}
                       onMouseDown={this.onMouseDownHandlerCanvas} onMouseUp={this.onMouseUpHandlerCanvas}
