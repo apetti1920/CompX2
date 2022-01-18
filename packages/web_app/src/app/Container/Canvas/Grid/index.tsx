@@ -2,6 +2,8 @@ import React from "react";
 
 import { PointType } from '@compx/common/Types'
 
+import theme from '../../../../theme';
+
 type PropType = {
     canvasTranslation: PointType
     canvasZoom: number
@@ -20,7 +22,7 @@ export default function (props: PropType): React.ReactElement {
                          `translate(${props.canvasTranslation.x} ${props.canvasTranslation.y})
                                      scale(${props.canvasZoom} ${props.canvasZoom})`}>
                 <circle cx={tickSpacing-radius} cy={tickSpacing-radius}
-                        r={radius} fill="black" opacity={0.75}/>
+                        r={radius} fill="black" opacity={0.75} style={{fill: theme.palette.text}}/>
             </pattern>
             <rect width="100%" height="100%" fill="url(#grid)"/>
             <g transform={`translate(${props.canvasTranslation.x} ${props.canvasTranslation.y})  

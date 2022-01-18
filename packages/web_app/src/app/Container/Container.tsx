@@ -3,6 +3,8 @@ import SplitPane from 'react-split-pane';
 
 import Canvas from './Canvas';
 
+import Glassomorphism from "../../theme/Glassomorphism";
+import theme from '../../theme';
 import './Split.css'
 
 type PropType = {};
@@ -18,7 +20,7 @@ export default class Container extends Component<PropType, StateType> {
 
     render() {
         return (
-            <div id="main-container" style={{width: "100%", height: "100%"}}>
+            <div id="main-container" style={{width: "100%", height: "100%", backgroundColor: theme.palette.background}}>
                 {/* A wrapper for the top toolbar */}
                 <div id="toolbar-wrapper" style={{width: "100%", height: this.toolbarHeight}} />
 
@@ -34,17 +36,15 @@ export default class Container extends Component<PropType, StateType> {
                     <SplitPane defaultSize="80%" minSize="5%" maxSize="95%" split='vertical' primary='second'
                                style={{width: `calc(100% - ${this.sidebar1Width})`, height: "100%", position: "unset"}}>
                         {/*A wrapper for the resizable sidebar*/}
-                        <div style={{width: "100%", height: "100%",
-                            backgroundColor: "blue", borderRadius: "10px", borderColor: 'black', borderWidth: "2px"}}/>
+                        <div style={{width: "100%", height: "100%", ...Glassomorphism('blue', 9.5), marginBottom: "5px"}}/>
 
                         {/*// A wrapper for the resizable main content area to the right of sidebar2*/}
                         <SplitPane defaultSize="75%" minSize="5%" maxSize="95%" split='horizontal'>
                             {/*// A wrapper for the canvas component*/}
-                            <Canvas />
+                            <Canvas style={{...Glassomorphism(theme.palette.background, 9.5)}}/>
 
                             {/*// A wrapper for the terminal component*/}
-                            <div style={{width: "100%", height: "100%", backgroundColor: "black",
-                                borderRadius: "10px", borderColor: 'black', borderWidth: "2px"}}/>
+                            <div style={{width: "100%", height: "100%", ...Glassomorphism('black', 9.5), marginBottom: "5px"}}/>
                         </SplitPane>
                     </SplitPane>
                 </div>

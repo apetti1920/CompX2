@@ -4,8 +4,13 @@ import Grid from "./Grid";
 import { ScreenToWorld } from "../../../helpers";
 import { LinearInterp, Clamp } from '@compx/common/Helpers/Other'
 import {PointType} from '@compx/common/Types';
+import Glassomorphism from "../../../theme/Glassomorphism";
+import theme from "../../../theme";
+import Keypad from "./Keypad";
 
-type PropType = {};
+type PropType = {
+    style?: React.CSSProperties
+};
 type StateType = {
     isMouseDownOnCanvas: boolean,
     canvasTranslation: PointType,
@@ -13,13 +18,12 @@ type StateType = {
 };
 
 export default class Container extends Component<PropType, StateType> {
-    private readonly canvasRef: React.MutableRefObject<SVGSVGElement | null>;
+    private readonly canvasRef: React.MutableRefObject<HTMLDivElement | null>;
 
     constructor(props: PropType) {
         super(props);
 
         this.canvasRef = React.createRef();
-
         this.state = {
             isMouseDownOnCanvas: false,
             canvasTranslation: { x: 0, y: 0 },
@@ -69,7 +73,7 @@ export default class Container extends Component<PropType, StateType> {
         const mouseWorld = ScreenToWorld({x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY},
             this.state.canvasTranslation, this.state.canvasZoom);
 
-        // calculate how much hasscrolled and interpolate to the zoom delta
+        // calculate how much has scrolled and interpolate to the zoom delta
         // also set a clamp to disallow zooms too large or small
         // noinspection JSSuspiciousNameCombination
         let tempScroll = this.state.canvasZoom + LinearInterp(e.deltaY, -100, 100, -0.2, 0.2);
@@ -102,17 +106,21 @@ export default class Container extends Component<PropType, StateType> {
 
     render() {
         return (
-            // Creates an svg canvas to draw the elements on
-            <svg id="Canvas" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" ref={this.canvasRef}>
-                {/* The background is used to handle the mouse events on the canvas */}
-                <rect id="CanvasBackground" width="100%" height="100%" pointerEvents="auto" opacity={0}
-                      onMouseDown={this.onMouseDownHandlerCanvas} onMouseUp={this.onMouseUpHandlerCanvas}
-                      onMouseMove={this.onMouseMoveOverHandlerCanvas} onWheel={this.handleScroll} order={0}
-                />
+            // Creates a svg canvas to draw the elements on
+            <div style={{width: "100%", height: "100%", pointerEvents: "none", ...this.props.style, overflow: "hidden", position: "relative"}} ref={this.canvasRef}>
+                <svg id="Canvas" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"
+                     pointerEvents="auto" style={{fill: 'black', float: 'left'}}>
+                    {/* The background is used to handle the mouse events on the canvas */}
+                    <rect id="CanvasBackground" width="100%" height="100%" pointerEvents="auto" opacity={0}
+                          onMouseDown={this.onMouseDownHandlerCanvas} onMouseUp={this.onMouseUpHandlerCanvas}
+                          onMouseMove={this.onMouseMoveOverHandlerCanvas} onWheel={this.handleScroll} order={0}
+                    />
 
-                {/* The Grid shows the dots and origon of the canvas */}
-                <Grid canvasTranslation={this.state.canvasTranslation} canvasZoom={this.state.canvasZoom} />
-            </svg>
+                    {/* The Grid shows the dots and origin of the canvas */}
+                    <Grid canvasTranslation={this.state.canvasTranslation} canvasZoom={this.state.canvasZoom} />
+                </svg>
+                <Keypad style={{...Glassomorphism(theme.palette.shadow, 9.0)}}/>
+            </div>
         )
     }
 }
