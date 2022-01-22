@@ -4,7 +4,7 @@ import Grid from "./Grid";
 import { ScreenToWorld } from "../../../helpers";
 import { LinearInterp, Clamp } from '@compx/common/Helpers/Other'
 import {PointType} from '@compx/common/Types';
-import Glassomorphism from "../../../theme/Glassomorphism";
+import { Glassomorphism } from "../../../theme/helpers";
 import theme from "../../../theme";
 import Keypad from "./Keypad";
 
@@ -107,9 +107,12 @@ export default class Container extends Component<PropType, StateType> {
     render() {
         return (
             // Creates a svg canvas to draw the elements on
-            <div style={{width: "100%", height: "100%", pointerEvents: "none", ...this.props.style, overflow: "hidden", position: "relative"}} ref={this.canvasRef}>
+            <div style={{
+                width: "100%", height: "100%", pointerEvents: "none", ...this.props.style,
+                overflow: "hidden", position: "relative"}} ref={this.canvasRef}>
                 <svg id="Canvas" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"
-                     pointerEvents="auto" style={{fill: 'black', float: 'left'}}>
+                     pointerEvents="auto" style={{fill: 'black', float: 'left', minWidth: "100%", minHeight: "100%"}}
+                     preserveAspectRatio="xMaxYMid meet">
                     {/* The background is used to handle the mouse events on the canvas */}
                     <rect id="CanvasBackground" width="100%" height="100%" pointerEvents="auto" opacity={0}
                           onMouseDown={this.onMouseDownHandlerCanvas} onMouseUp={this.onMouseUpHandlerCanvas}
@@ -119,7 +122,7 @@ export default class Container extends Component<PropType, StateType> {
                     {/* The Grid shows the dots and origin of the canvas */}
                     <Grid canvasTranslation={this.state.canvasTranslation} canvasZoom={this.state.canvasZoom} />
                 </svg>
-                <Keypad style={{...Glassomorphism(theme.palette.shadow, 9.0)}}/>
+                <Keypad centerClickHandler={this.center}/>
             </div>
         )
     }
