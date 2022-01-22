@@ -2,6 +2,7 @@ import { isPortStorageType, isPortStorageWithIDType } from "./PortStorage";
 import { PortStringListType } from "../../Graph/Port";
 import { MapStringsToPortStoragesType, MapStringsToPortStoragesWithIDType } from "../../Graph/Block";
 import { WithID } from "../../Helpers/Types";
+import {PointType} from "../../Types";
 
 export type BlockStorageType<
     Inputs extends PortStringListType, Outputs extends PortStringListType
@@ -54,3 +55,12 @@ export function isBlockStorageWithIDType<
 
     return true
 }
+
+export interface VisualBlockStorageType<Inputs extends PortStringListType, Outputs extends PortStringListType> extends
+    BlockStorageWithIDType<Inputs, Outputs> {
+        visualName: string,
+        position: PointType
+        size: PointType
+        mirrored: boolean,
+        shape: "rect" | "tri" | "circ"
+    }

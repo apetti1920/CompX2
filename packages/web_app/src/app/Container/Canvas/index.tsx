@@ -5,11 +5,16 @@ import { ScreenToWorld } from "../../../helpers";
 import { LinearInterp, Clamp } from '@compx/common/Helpers/Other'
 import {PointType} from '@compx/common/Types';
 import Keypad from "./Keypad";
+import GraphComponent from "./Graph/GraphComponent";
+
+import { VisualGraphStorageType } from '@compx/common/Network/GraphItemStorage/GraphStorage';
+import {MakeVisualGraph} from "./Graph/testGraph.js";
 
 type PropType = {
     style?: React.CSSProperties
 };
 type StateType = {
+    graph: VisualGraphStorageType
     isMouseDownOnCanvas: boolean,
     canvasTranslation: PointType,
     canvasZoom: number
@@ -23,6 +28,7 @@ export default class Container extends Component<PropType, StateType> {
 
         this.canvasRef = React.createRef();
         this.state = {
+            graph: {blocks: []},
             isMouseDownOnCanvas: false,
             canvasTranslation: { x: 0, y: 0 },
             canvasZoom: 1
@@ -30,7 +36,9 @@ export default class Container extends Component<PropType, StateType> {
     }
 
     componentDidMount() {
-        this.center();
+        this.setState({graph: MakeVisualGraph()}, () => {
+            this.center();
+        });
     }
 
     // Handles the state change when the mouse is pressed
@@ -144,6 +152,8 @@ export default class Container extends Component<PropType, StateType> {
 
                     {/* The Grid shows the dots and origin of the canvas */}
                     <Grid canvasTranslation={this.state.canvasTranslation} canvasZoom={this.state.canvasZoom} />
+                    <GraphComponent graph={this.state.graph} canvasTranslation={this.state.canvasTranslation}
+                                    canvasZoom={this.state.canvasZoom}/>
                 </svg>
                 <Keypad centerClickHandler={this.center}
                         zoomInClick={()=>{this.handleZoomClick(true)}}
