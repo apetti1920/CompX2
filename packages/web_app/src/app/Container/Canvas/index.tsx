@@ -4,8 +4,6 @@ import Grid from "./Grid";
 import { ScreenToWorld } from "../../../helpers";
 import { LinearInterp, Clamp } from '@compx/common/Helpers/Other'
 import {PointType} from '@compx/common/Types';
-import { Glassomorphism } from "../../../theme/helpers";
-import theme from "../../../theme";
 import Keypad from "./Keypad";
 
 type PropType = {
@@ -66,6 +64,43 @@ export default class Container extends Component<PropType, StateType> {
         e.stopPropagation();
     }
 
+    // Handling an arbitrary zoom
+    handleZoom = (amount: number, around: PointType) => {
+        amount = this.state.canvasZoom + amount;
+        const tempScroll = Clamp(amount, 1/3, 4);
+
+        // calculate the new translation about the scale change
+        const scaleChange = tempScroll - this.state.canvasZoom;
+        const newTranslation = {
+            x: this.state.canvasTranslation.x - (around.x * scaleChange),
+            y: this.state.canvasTranslation.y - (around.y * scaleChange)
+        }
+
+        this.setState({
+            canvasZoom: tempScroll,
+            canvasTranslation: newTranslation
+        });
+    }
+
+    handleZoomClick = (zoomIn: boolean) => {
+        const amount = 0.24 * (zoomIn?1:-1);
+
+        let windowCenter: PointType = this.state.canvasTranslation;
+        if (this.canvasRef !== null && this.canvasRef.current !== null) {
+            const canvasX = this.canvasRef.current.getBoundingClientRect().x
+            const canvasY = this.canvasRef.current.getBoundingClientRect().y;
+            const canvasWidth = this.canvasRef.current.clientWidth;
+            const canvasHeight = this.canvasRef.current.clientHeight;
+
+            windowCenter = ScreenToWorld({
+                x: canvasX + (canvasWidth / 2.0),
+                y: canvasY + (canvasHeight / 2.0)
+            }, this.state.canvasTranslation, this.state.canvasZoom);
+        }
+
+        this.handleZoom(amount, windowCenter);
+    }
+
     // handles how the canvas will zoom with the scroll wheel
     handleScroll = (e: React.WheelEvent) => {
         // converts the position of the mouse on the screen to coordinates in the canvas world
@@ -76,27 +111,15 @@ export default class Container extends Component<PropType, StateType> {
         // calculate how much has scrolled and interpolate to the zoom delta
         // also set a clamp to disallow zooms too large or small
         // noinspection JSSuspiciousNameCombination
-        let tempScroll = this.state.canvasZoom + LinearInterp(e.deltaY, -100, 100, -0.2, 0.2);
-        tempScroll = Clamp(tempScroll, 1/3, 4);
-
-        // calculate the new translation about the scale change
-        const scaleChange = tempScroll - this.state.canvasZoom;
-        const newTranslation = {
-            x: this.state.canvasTranslation.x - (mouseWorld.x * scaleChange),
-            y: this.state.canvasTranslation.y - (mouseWorld.y * scaleChange)
-        }
-
-        this.setState({
-            canvasZoom: tempScroll,
-            canvasTranslation: newTranslation
-        });
+        let tempScroll = LinearInterp(e.deltaY, -100, 100, -0.2, 0.2);
+        this.handleZoom(tempScroll, mouseWorld)
 
         e.stopPropagation();
     };
 
     // centers the canvas
     center = () => {
-        if (this.canvasRef !== null &&  this.canvasRef.current !== null) {
+        if (this.canvasRef !== null && this.canvasRef.current !== null) {
             const canvasWidth = this.canvasRef.current.clientWidth;
             const canvasHeight = this.canvasRef.current.clientHeight;
 
@@ -122,7 +145,9 @@ export default class Container extends Component<PropType, StateType> {
                     {/* The Grid shows the dots and origin of the canvas */}
                     <Grid canvasTranslation={this.state.canvasTranslation} canvasZoom={this.state.canvasZoom} />
                 </svg>
-                <Keypad centerClickHandler={this.center}/>
+                <Keypad centerClickHandler={this.center}
+                        zoomInClick={()=>{this.handleZoomClick(true)}}
+                        zoomOutClick={()=>{this.handleZoomClick(false)}}/>
             </div>
         )
     }
