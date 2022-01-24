@@ -123,8 +123,8 @@ class Container extends Component<PropType, StateType> {
             const canvasHeight = this.canvasRef.current.clientHeight;
 
             const delta = {
-                x: this.props.canvasTranslation.x - (canvasWidth/2.0),
-                y: this.props.canvasTranslation.y - (canvasHeight/2.0)
+                x: (canvasWidth/2.0) - this.props.canvasTranslation.x,
+                y: (canvasHeight/2.0) - this.props.canvasTranslation.y
             }
             this.props.onTranslate(delta);
         }
