@@ -7,6 +7,7 @@ type PropType = {
     graph: VisualGraphStorageType,
     canvasTranslation: PointType
     canvasZoom: number
+    onWheel: (e: React.WheelEvent) => void
 };
 type StateType = {};
 
@@ -20,7 +21,8 @@ export default class GraphComponent extends Component<PropType, StateType> {
             <g id="GraphGroup" transform={`translate(${this.props.canvasTranslation.x} ${this.props.canvasTranslation.y})  
                                                     scale(${this.props.canvasZoom} ${this.props.canvasZoom})`}>
                 <g id="BlockGroup">
-                    {this.props.graph.blocks.map(block => <BlockComponent key={block.id} block={block} />)}
+                    {this.props.graph.blocks.map(block => <BlockComponent key={block.id} block={block}
+                                                                          onWheel={this.props.onWheel}/>)}
                 </g>
             </g>
         )
