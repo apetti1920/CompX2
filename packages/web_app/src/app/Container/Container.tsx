@@ -1,10 +1,8 @@
 import React, {Component} from 'react';
-import SplitPane from 'react-split-pane';
 
 import Canvas from './Canvas';
 
 import { Glassomorphism } from "../../theme/helpers";
-import theme from '../../theme';
 import './Split.css'
 
 type PropType = {};
@@ -13,7 +11,8 @@ type StateType = {};
 export default class Container extends Component<PropType, StateType> {
     private readonly toolbarHeight: string = "60px";
     private readonly sidebar1Width: string = "45px";
-    private readonly paddingAmount: string = "1px";
+    private readonly borderRadius: string = "25px";
+    private readonly paddingAmount: number = 30;
 
     constructor(props: PropType) {
         super(props);
@@ -21,38 +20,39 @@ export default class Container extends Component<PropType, StateType> {
 
     render() {
         return (
-            <div id="main-container" style={{width: "100%", height: "100%", backgroundColor: theme.palette.background}}>
-                {/* A wrapper for the top toolbar */}
-                <div id="toolbar-wrapper" style={{width: "100%", height: this.toolbarHeight}} />
+            <div id="main-container" style={{width: "100%", height: "100%", position: "relative"}}>
+                <Canvas style={{position: "absolute", top: 0, left: 0}}/>
+                <div id="overlay" style={{
+                    zIndex: 1, position: "relative", width: "100%", height: "100%", pointerEvents: "none",
+                    display: "flex", flexFlow: "column nowrap"}}>
+                    <div className="top-overlay"
+                         style={{padding: `${this.paddingAmount/2}px ${this.paddingAmount}px 0px ${this.paddingAmount}px`}}>
+                        <div style={{backgroundColor: "red", width: "100%", borderRadius: this.borderRadius, height: this.toolbarHeight}}/>
+                    </div>
+                    <div style={{width: "100%", height: "100%"}}>
+                        <div className="left-overlay"
+                             style={{display: "flex", flexFlow: "row nowrap", height: "100%", boxSizing: "border-box",
+                                 padding: `${this.paddingAmount}px 0px ${this.paddingAmount}px ${this.paddingAmount/2}px`}}>
+                            <div style={{backgroundColor: "red", width: "30px", borderRadius: this.borderRadius, height: "100%", marginRight: `${this.paddingAmount}px`}}/>
+                            <div style={{backgroundColor: "red", width: "300px", borderRadius: this.borderRadius, height: "100%"}}/>
+                        </div>
+                        <div style={{width: "100%", height: "100%", display: "flex", flexFlow: "column nowrap"}}>
+                            <div>
+                                <div style={{width: "100%", height: "100%"}}/>
+                                <div className="right-overlay"
+                                     style={{display: "flex", flexFlow: "row nowrap", height: "100%", boxSizing: "border-box",
+                                         padding: `${this.paddingAmount}px 0px ${this.paddingAmount}px ${this.paddingAmount/2}px`}}>
+                                    <div style={{backgroundColor: "red", width: "30px", borderRadius: this.borderRadius, height: "100%", marginRight: `${this.paddingAmount}px`}}/>
+                                    <div style={{backgroundColor: "red", width: "300px", borderRadius: this.borderRadius, height: "100%"}}/>
+                                </div>
+                            </div>
+                            <div>
 
-                {/* A wrapper content under the toolbar */}
-                <div id="content1-wrapper" style={{
-                    width: "100%", height: `calc(100% - ${this.toolbarHeight} - ${this.paddingAmount})`,
-                    display: 'flex', flexFlow: "row nowrap"
-                }}>
-                    {/* A wrapper sidebar on the left */}
-                    <div id="sidebar1-wrapper" style={{width: this.sidebar1Width, height: "100%"}}/>
-
-                    {/* Main Content Space */}
-                    <SplitPane defaultSize="80%" minSize="5%" maxSize="95%" split='vertical' primary='second'
-                               style={{width: `calc(100% - ${this.sidebar1Width} - ${this.paddingAmount})`,
-                                   height: "100%", position: "unset"}}>
-                        {/*A wrapper for the resizable sidebar*/}
-                        <div style={{width: "100%", height: "100%", ...Glassomorphism('blue', 9.5, 0.20), marginBottom: "5px"}}/>
-
-                        {/*// A wrapper for the resizable main content area to the right of sidebar2*/}
-                        <SplitPane defaultSize="75%" minSize="5%" maxSize="95%" split='horizontal'>
-                            {/*// A wrapper for the canvas component*/}
-                            <Canvas style={{...Glassomorphism(theme.palette.background, 9.5, 0.20)}}/>
-
-                            {/*// A wrapper for the terminal component*/}
-                            <div style={{width: "100%", height: "100%", ...Glassomorphism('black', 9.5, 0.20), marginBottom: "5px"}}/>
-                        </SplitPane>
-                    </SplitPane>
-
-                    <div style={{width: this.paddingAmount, height: "100%"}}/>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div style={{width: "100%", height: this.paddingAmount}} />
+
             </div>
         )
     }

@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 
 import Grid from "./Grid";
-import Keypad from "./Keypad";
 import GraphComponent from "./Graph/GraphComponent";
 
 import { ScreenToWorld } from "../../../helpers";
@@ -10,15 +9,17 @@ import { PointType } from '@compx/common/Types';
 import { StateType as SaveState } from "../../../store/types";
 import { VisualGraphStorageType } from '@compx/common/Network/GraphItemStorage/GraphStorage'
 
-import {connect} from "react-redux";
-import {bindActionCreators, Dispatch} from 'redux';
-import {TranslatedCanvasAction, ZoomedCanvasAction} from "../../../store/actions/canvasactions";
+import { connect } from "react-redux";
+import { bindActionCreators, Dispatch } from 'redux';
+import { TranslatedCanvasAction, ZoomedCanvasAction } from "../../../store/actions/canvasactions";
+import {ThemeType} from "../../../types";
 
 // Get the global state from redux
 type GlobalProps = {
     currentGraph: VisualGraphStorageType,
     canvasTranslation: PointType,
     canvasZoom: number
+    theme: ThemeType
 }
 
 // Add the redux actions to props
@@ -133,16 +134,16 @@ class Container extends Component<PropType, StateType> {
     render() {
         return (
             // Creates a svg canvas to draw the elements on
-            <div style={{
-                width: "100%", height: "100%", pointerEvents: "none", ...this.props.style,
-                overflow: "hidden", position: "relative"}} ref={this.canvasRef}>
+            <div style={{...this.props.style, width: "100%", height: "100%",
+                pointerEvents: "none", overflow: "hidden"}} ref={this.canvasRef}>
                 <svg id="Canvas" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"
-                     pointerEvents="auto" style={{fill: 'black', float: 'left', minWidth: "100%", minHeight: "100%"}}
+                     pointerEvents="auto" style={{float: 'left', minWidth: "100%", minHeight: "100%"}}
                      preserveAspectRatio="xMaxYMid meet">
                     {/* The background is used to handle the mouse events on the canvas */}
-                    <rect id="CanvasBackground" width="100%" height="100%" pointerEvents="auto" opacity={0}
+                    <rect id="CanvasBackground" width="100%" height="100%" pointerEvents="auto"
                           onMouseDown={this.onMouseDownHandlerCanvas} onMouseUp={this.onMouseUpHandlerCanvas}
                           onMouseMove={this.onMouseMoveOverHandlerCanvas} onWheel={this.handleScroll} order={0}
+                          fill={this.props.theme.palette.background}
                     />
 
                     {/* The Grid shows the dots and origin of the canvas */}
@@ -152,9 +153,9 @@ class Container extends Component<PropType, StateType> {
                                     canvasTranslation={this.props.canvasTranslation}
                                     canvasZoom={this.props.canvasZoom} onWheel={this.handleScroll}/>
                 </svg>
-                <Keypad centerClickHandler={this.center}
-                        zoomInClick={()=>{this.handleZoomClick(true)}}
-                        zoomOutClick={()=>{this.handleZoomClick(false)}}/>
+                {/*<Keypad centerClickHandler={this.center}*/}
+                {/*        zoomInClick={()=>{this.handleZoomClick(true)}}*/}
+                {/*        zoomOutClick={()=>{this.handleZoomClick(false)}}/>*/}
             </div>
         )
     }
@@ -163,6 +164,7 @@ class Container extends Component<PropType, StateType> {
 // Creates a function to map the redux state to the redux props
 function mapStateToProps(state: SaveState): GlobalProps {
     return {
+        theme: state.userStorage.theme,
         currentGraph: state.currentGraph,
         canvasTranslation: state.userStorage.canvas.translation,
         canvasZoom: state.userStorage.canvas.zoom
