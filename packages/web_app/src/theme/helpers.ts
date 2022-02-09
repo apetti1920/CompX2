@@ -1,11 +1,11 @@
 import React from 'react';
 
 export function SetOpacity(color: string, opacity: number): string {
-    if (opacity < 0) opacity = 0;
-    if (opacity > 1) opacity = 1;
+    if (opacity < 0.0) opacity = 0.0;
+    if (opacity > 1.0) opacity = 1.0;
 
-    let _opacity = Math.round(Math.min(Math.max(opacity || 1, 0), 1) * 255);
-    return color + _opacity.toString(16).toUpperCase();
+    let _opacity = Math.round(Math.min(Math.max(opacity, 0), 1) * 255);
+    return color + _opacity.toString(16).toUpperCase() + (_opacity === 0.0 ? "0" : "");
 }
 
 export function Glassomorphism(color: string, filterAmount: number, transparencyAmount: number): React.CSSProperties {

@@ -41,7 +41,7 @@ type StateType = {
     isMouseDownOnCanvas: boolean
 };
 
-class Container extends Component<PropType, StateType> {
+class Canvas extends Component<PropType, StateType> {
     private readonly canvasRef: React.MutableRefObject<HTMLDivElement | null>;
 
     constructor(props: PropType) {
@@ -180,5 +180,5 @@ function mapDispatchToProps(dispatch: Dispatch): DispatchProps {
 }
 
 // Exports the redux connected component
-export default connect(mapStateToProps, mapDispatchToProps)(Container)
+export default connect(mapStateToProps, mapDispatchToProps)(Canvas)
 

@@ -1,5 +1,16 @@
 version: "3.9"
 services:
+#  build_server:
+#    image: docker:stable-dind
+#    container_name: build_server
+#    privileged: true
+#    expose:
+#      - 2375
+#    environment:
+#      DOCKER_TLS_CERTDIR: ""
+#    networks:
+#      - docker_build_net
+#    restart: always
   test_server:
     image: docker:stable-dind
     container_name: test_server
@@ -9,7 +20,7 @@ services:
     environment:
       DOCKER_TLS_CERTDIR: ""
     networks:
-      - docker_net
+      - docker_test_net
     restart: always
   jeknins:
     image: jenkinsci/blueocean
@@ -27,9 +38,11 @@ services:
     links:
       - test_server
     networks:
-      - docker_net
+      - docker_test_net
+      - docker_build_net
     restart: always
 volumes:
   jenkins_home:
 networks:
-  docker_net:
+  docker_test_net:
+  docker_build_net:
