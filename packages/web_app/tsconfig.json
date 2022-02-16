@@ -10,9 +10,11 @@
     ],
     "strict": true,
     "sourceMap": true,
-    "target": "esnext",
+    "target": "esnext"
   },
   "exclude": [
     "node_modules"
-  ]
+  ],
+  "include": ["src"],
+  "files": ["src/types/custom.d.ts"]
 }

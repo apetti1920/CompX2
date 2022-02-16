@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import { connect } from "react-redux";
 
-import { Trash,  User, Play, } from 'react-feather';
+import Logo from '../../../../assets/logo.svg';
+import { User, Play, } from 'react-feather';
 import { Container, Navbar, Form } from "react-bootstrap";
 
 import { StateType as SaveState } from '../../../store/types'
@@ -20,6 +21,8 @@ type PropsType = GlobalProps & DispatchProps & ComponentProps
 type StateType = {};
 
 class Overlay extends Component<PropsType, StateType> {
+    private TopPadding = "0px 24px 0px 24px";
+
     constructor(props: PropsType) {
         super(props);
     }
@@ -35,12 +38,18 @@ class Overlay extends Component<PropsType, StateType> {
                                     ${SetOpacity(this.props.theme.palette.background, 1.0)})`,
                     pointerEvents: "auto"
                 }}>
-                    <Container fluid style={{height: "50px", padding: "0px 60px 0px 60px"}}>
-                        <Navbar>
+                    <Container fluid style={{height: "50px", padding: this.TopPadding}}>
+                        <Navbar style={{height: "100%"}}>
                             <Container fluid>
-                                <Navbar.Brand style={{color: this.props.theme.palette.text}}>
-                                    <Trash width="30" height={30} stroke={this.props.theme.palette.text}/>
-                                    React Bootstrap
+                                <Navbar.Brand style={{userSelect: "none",  color: this.props.theme.palette.text}} >
+                                    <img
+                                        alt=""
+                                        src={Logo}
+                                        width="30"
+                                        height="30"
+                                        className="d-inline-block align-top"
+                                    />{' '}
+                                    CompX
                                 </Navbar.Brand>
                                 <Navbar.Collapse className="justify-content-end">
                                     <User stroke={this.props.theme.palette.text}/>
@@ -48,10 +57,10 @@ class Overlay extends Component<PropsType, StateType> {
                             </Container>
                         </Navbar>
                     </Container>
-                    <Container fluid style={{height: "40px", padding: "0px 60px 0px 60px"}}>
+                    <Container fluid style={{height: "40px", padding: this.TopPadding}}>
                         <div style={{
                             width: "100%", height: "100%", backgroundColor: this.props.theme.palette.text,
-                            borderRadius: "25px", display: "flex", flexFlow: "row nowrap", padding: "0px 25px 0px 25px"
+                            borderRadius: "20px", display: "flex", flexFlow: "row nowrap", padding: "0px 20px 0px 20px"
                         }}>
                             <div style={{width: "50%", height: "100%", display: "flex", flexFlow: "row nowrap", alignItems: "center", gap: "5px"}}>
 

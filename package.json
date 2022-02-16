@@ -2,6 +2,9 @@
   "name": "compx",
   "private": true,
   "version": "1.0.0",
+  "imports": {
+    "assets/*": "assets/*"
+  },
   "scripts": {
     "build": "npx lerna run build",
     "start:electron": "npx lerna run --scope=@compx/electron_app build && npx lerna run start --scope=@compx/electron_app",

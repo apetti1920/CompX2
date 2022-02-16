@@ -1,11 +1,11 @@
-const path = require('path');
+const webPath = require('path');
 const { merge } = require('webpack-merge');
 const baseConfig = require('./base.config');
 
-const outputPath = path.join(__dirname, "..", "..", '/dist/web');
+const outputPath = webPath.join(__dirname, "..", "..", '/dist/web');
 
 module.exports = merge(baseConfig, {
-    entry: path.join(__dirname, "..", "..", '/src/index.web.tsx'),
+    entry: webPath.join(__dirname, "..", "..", '/src/index.web.tsx'),
     output: {
         path: outputPath
     },
