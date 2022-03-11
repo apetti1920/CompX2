@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const HtmlWebpackInlineSVGPlugin = require("html-webpack-inline-svg-plugin");
 
 const prod = process.env.NODE_ENV === 'production';
 
@@ -19,6 +20,17 @@ module.exports = {
                     test: /\.css$/,
                     use: [MiniCssExtractPlugin.loader, 'css-loader'],
                 },
+                {
+                    test: /\.(png|jp(e*)g|svg|gif)$/,
+                    use: [
+                        {
+                            loader: 'file-loader',
+                            options: {
+                                name: 'images/[hash]-[name].[ext]',
+                            },
+                        },
+                    ],
+                }
             ]
         },
         devtool: prod ? undefined : 'source-map',
@@ -27,5 +39,8 @@ module.exports = {
                 template: 'index.html',
             }),
             new MiniCssExtractPlugin(),
+            new HtmlWebpackInlineSVGPlugin({
+                runPreEmit: true,
+            }),
         ]
 };

@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Initialize Folder Image') {
+            steps {
+                sh 'docker build -t base_node_folder -f base.dockerfile .'
+            }
+        }
+        stage('Common Pipeline') {
+            when {
+                allOf {
+                    expression { env.BRANCH_NAME ==~ /trunc-\w+-\d+/ }
+//                     changeset "packages/common/src/**/*.*"
+                }
+            }
+            stages {
+                stage ("Test Common") {
+                    steps {
+                        echo "Starting Tests"
+                        dir('packages/common') {
+                            sh 'docker build -t common_test -f __tests__/test.common.dockerfile .'
+                            sh 'container_id=$(docker run --rm -d common_test) && \
+                                docker cp $container_id:/compx/packages/common/__tests__/coverage common_coverage; \
+                                docker stop $container_id'
+                        }
+                        echo "Finished Tests"
+                    }
+                }
+            }
+            post {
+                always {
+                    dir('packages/common') {
+                        archiveArtifacts artifacts: 'common_coverage/**/*.*'
+                    }
+                }
+            }
+        }
+    }
+}

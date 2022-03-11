@@ -1,0 +1,48 @@
+version: "3.9"
+services:
+#  build_server:
+#    image: docker:stable-dind
+#    container_name: build_server
+#    privileged: true
+#    expose:
+#      - 2375
+#    environment:
+#      DOCKER_TLS_CERTDIR: ""
+#    networks:
+#      - docker_build_net
+#    restart: always
+  test_server:
+    image: docker:stable-dind
+    container_name: test_server
+    privileged: true
+    expose:
+      - 2375
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    networks:
+      - docker_test_net
+    restart: always
+  jeknins:
+    image: jenkinsci/blueocean
+    container_name: jenkins
+    user: root
+    volumes:
+      - "jenkins_home:/var/jenkins_home"
+      - "/Users/apettti1920/Documents/GitHub/CompX2/CompX:/mnt/repo_data"
+    ports:
+      - "8080:8080"
+    environment:
+      DOCKER_HOST: "test_server:2375"
+    depends_on:
+      - test_server
+    links:
+      - test_server
+    networks:
+      - docker_test_net
+      - docker_build_net
+    restart: always
+volumes:
+  jenkins_home:
+networks:
+  docker_test_net:
+  docker_build_net:

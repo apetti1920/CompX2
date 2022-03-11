@@ -6,10 +6,14 @@ import {
     isPortStorageWithIDType, PortStorageWithIDType
 } from "../../src/Network/GraphItemStorage/PortStorage";
 import {Port} from "../../src/Graph/Port";
-import {PortTypeInitializers} from "../../dist/Graph/Port";
+import {PortTypeInitializers} from "../../src/Graph/Port";
 
 // Tests port features
 describe("Port Tests", () => {
+    test("Failure", () => {
+        expect(2+2).toBe(5);
+    });
+
     test("Is port storage type", ()=>{
         const p: PortStorageType<"NUMBER"> = { name: "test1", type: "NUMBER", initialValue: 0 };
         expect(isPortStorageType(p)).toBeTruthy();

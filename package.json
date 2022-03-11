@@ -2,6 +2,9 @@
   "name": "compx",
   "private": true,
   "version": "1.0.0",
+  "imports": {
+    "assets/*": "assets/*"
+  },
   "scripts": {
     "build": "npx lerna run build",
     "start:electron": "npx lerna run --scope=@compx/electron_app build && npx lerna run start --scope=@compx/electron_app",
@@ -11,7 +14,6 @@
   "author": "Aidan Petti",
   "license": "ISC",
   "devDependencies": {
-    "@types/jest": "^27.0.3",
     "@types/lodash": "^4.14.178",
     "@types/node": "^16.11.7",
     "jest": "^27.4.0",
