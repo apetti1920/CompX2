@@ -151,7 +151,8 @@ class Canvas extends Component<PropType, StateType> {
                           canvasZoom={this.props.canvasZoom} />
                     <GraphComponent graph={this.props.currentGraph}
                                     canvasTranslation={this.props.canvasTranslation}
-                                    canvasZoom={this.props.canvasZoom} onWheel={this.handleScroll}/>
+                                    canvasZoom={this.props.canvasZoom} onWheel={this.handleScroll}
+                                    theme={this.props.theme}/>
                 </svg>
                 {/*<Keypad centerClickHandler={this.center}*/}
                 {/*        zoomInClick={()=>{this.handleZoomClick(true)}}*/}

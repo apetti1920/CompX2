@@ -7,20 +7,17 @@ const prod = process.env.NODE_ENV === 'production';
 module.exports = {
         mode: prod ? 'production' : 'development',
         module: {
-            rules: [
-                {
+            rules: [{
                     test: /\.(ts|tsx)$/,
                     exclude: /node_modules/,
                     resolve: {
                         extensions: ['.ts', '.tsx', '.js', '.json'],
                     },
                     use: 'ts-loader',
-                },
-                {
+                }, {
                     test: /\.css$/,
                     use: [MiniCssExtractPlugin.loader, 'css-loader'],
-                },
-                {
+                }, {
                     test: /\.(png|jp(e*)g|svg|gif)$/,
                     use: [
                         {
@@ -30,8 +27,7 @@ module.exports = {
                             },
                         },
                     ],
-                }
-            ]
+                }]
         },
         devtool: prod ? undefined : 'source-map',
         plugins: [
