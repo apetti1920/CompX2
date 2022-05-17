@@ -1,4 +1,4 @@
-import { PointType } from '@compx/common/Types';
+import { PointType } from '@compx/common/Types'
 
 /* Utility function to convert on screen mouse coordinates to canvas coordinates*/
 export function ScreenToWorld(point: PointType, translation: PointType, zoom: number): PointType {
