@@ -102,20 +102,21 @@ export default class CanvasContainer2 extends Component<PropType, StateType> {
         this.canvasRef.current.addEventListener("wheel", (e)=>{
             e.preventDefault();
             if (this.canvasRef.current === null || this.canvasRef.current === undefined) return;
+            const size = { x: this.canvasRef.current.clientWidth, y: this.canvasRef.current.clientHeight};
 
             let tempScroll = LinearInterp(-e.deltaY, -100, 100, -0.2, 0.2);
             const newZoom = this.state.zoom + tempScroll;
             const clampedZoom = Clamp(newZoom, 1/3, 4);
             const scaleChange = clampedZoom - this.state.zoom;
-            const size = { x: this.canvasRef.current.clientWidth, y: this.canvasRef.current.clientHeight};
-            let zoomAround = ScreenToWorld({x: e.offsetX, y: e.offsetY},
+
+
+            let zoomAround = ScreenToWorld({x: e.offsetX - (size.x/2.0), y: e.offsetY - (size.y/2.0)},
                 this.state.center, this.state.zoom);
-            zoomAround = {x: zoomAround.x - (size.x/2.0), y:zoomAround.y - (size.y/2.0)}
             const newTranslation = {
-                x: -this.state.center.x + (zoomAround.x * scaleChange),
+                x: this.state.center.x + (zoomAround.x * scaleChange),
                 y:  this.state.center.y - (zoomAround.y * scaleChange)
             }
-            //console.log({x: e.offsetX, y: e.offsetY}, zoomAround, newTranslation, clampedZoom);
+            // console.log(e.offsetX, e.offsetY, size, this.state.center, scaleChange, zoomAround);
 
             this.setState({zoom: clampedZoom, center: newTranslation}, ()=>requestAnimationFrame(()=>this.Draw()));
         });
