@@ -25,6 +25,7 @@ export default function (state: StateType, action: ActionPayloadType): StateType
 
             // Calculate the new zoom with the delta
             const delta: number = action.payload['delta'];
+
             const newZoom = state.userStorage.canvas.zoom + delta;
             const clampedZoom = Clamp(newZoom, 1/3, 4);
 

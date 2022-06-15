@@ -34,7 +34,6 @@ export default function DrawGrid(context: CanvasRenderingContext2D, size: PointT
     DrawGridInt(context, size, position, major, 3, '#888');
     DrawGridInt(context, size, position, minor, 1, SetOpacity('#888', Clamp(LinearInterp(zoomLevel, 0.5, 4.0, 0, 0.6), 0.0, 1.0)));
 
-
     context.beginPath();
     context.arc((size.x/2.0)-position.x, (size.y/2.0)+position.y, 25*zoomLevel, 0, 2 * Math.PI, false);
     context.fillStyle = 'green';
