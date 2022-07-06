@@ -14,7 +14,7 @@ type GlobalProps = {
 }
 type DispatchProps = {
     onZoom: (delta: number, around: PointType) => void,
-    onTranslate: (delta: PointType) => void
+    onTranslate: (point: PointType) => void
 }
 type ComponentProps = {};
 type PropsType = GlobalProps & DispatchProps & ComponentProps
@@ -78,29 +78,32 @@ class CanvasContainer2 extends Component<PropsType, StateType> {
         window.addEventListener('resize', ()=>requestAnimationFrame(()=>this.Draw()));
 
         // ----------------------------- Mouse Events ------------------------------------------------------------------
-        // this.canvasRef.current.addEventListener("mousedown", (e)=> {
-        //     if (e.button === 0) {
-        //         this.setState({mouseDown: true});
-        //     }
-        // }, false);
-        // this.canvasRef.current.addEventListener("mousemove", (e)=>{
-        //     if (this.state.mouseDown) {
-        //         // this.props.onTranslate({x: -e.movementX, y: e.movementY});
-        //         e.preventDefault();
-        //         const size = this.GetWindowSize(); if (size === undefined) return;
-        //         let offset = ScreenToWorld(
-        //             {x: e.offsetX, y: e.offsetY},
-        //             this.props.canvasTranslation,
-        //             this.props.canvasZoom, size
-        //         );
-        //         console.log(offset);
-        //     }
-        // }, false);
-        // this.canvasRef.current.addEventListener("mouseup", (e)=> {
-        //     if (e.button === 0) {
-        //         this.setState({mouseDown: false});
-        //     }
-        // }, false);
+        this.canvasRef.current.addEventListener("mousedown", (e)=> {
+            if (e.button === 0) {
+                e.preventDefault();
+                this.setState({ mouseDown: true });
+            }
+        }, false);
+        this.canvasRef.current.addEventListener("mousemove", (e)=>{
+            if (this.state.mouseDown) {
+                e.preventDefault();
+
+                this.props.onTranslate({
+                    x: this.props.canvasTranslation.x + e.movementX,
+                    y: this.props.canvasTranslation.y + e.movementY
+                });
+            }
+        }, false);
+        this.canvasRef.current.addEventListener("mouseup", (e)=> {
+            if (e.button === 0) {
+                this.setState({mouseDown: false});
+            }
+        }, false);
+        this.canvasRef.current.addEventListener("mouseout", (e)=> {
+            if (e.button === 0) {
+                this.setState({mouseDown: false});
+            }
+        }, false);
 
         // ----------------------------- Zoom Events -------------------------------------------------------------------
         this.canvasRef.current.addEventListener("wheel", (e)=>{

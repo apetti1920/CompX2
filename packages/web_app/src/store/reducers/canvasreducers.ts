@@ -9,14 +9,7 @@ export default function (state: StateType, action: ActionPayloadType): StateType
     switch (action.type) {
         case (TranslatedCanvasActionType): {
             const tempState  = _.cloneDeep(state);
-
-            const delta: PointType = action.payload['delta']
-
-            // Calculates the new translation by the delta of the movement of the mouse
-            tempState.userStorage.canvas.translation =  {
-                x: state.userStorage.canvas.translation.x + delta.x,
-                y: state.userStorage.canvas.translation.y + delta.y
-            };
+            tempState.userStorage.canvas.translation = action.payload['point']
 
             return tempState;
         }
