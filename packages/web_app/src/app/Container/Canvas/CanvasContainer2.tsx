@@ -52,11 +52,15 @@ class CanvasContainer2 extends Component<PropsType, StateType> {
 
     Draw() {
         if (this.state.context === undefined || this.canvasRef.current === null) return;
-
-        const size = { x: this.canvasRef.current.clientWidth, y: this.canvasRef.current.clientHeight};
+        const size = this.GetWindowSize(); if (size === undefined) return;
         this.state.context.clearRect(0, 0, size.x, size.y);
 
         DrawGrid(this.state.context, size, this.props.canvasTranslation, this.props.canvasZoom);
+    }
+
+    GetWindowSize(): PointType | undefined {
+        if (this.canvasRef.current === null || this.canvasRef.current === undefined) return;
+        return { x: this.canvasRef.current.clientWidth, y: this.canvasRef.current.clientHeight};
     }
 
     componentDidMount() {
@@ -74,34 +78,43 @@ class CanvasContainer2 extends Component<PropsType, StateType> {
         window.addEventListener('resize', ()=>requestAnimationFrame(()=>this.Draw()));
 
         // ----------------------------- Mouse Events ------------------------------------------------------------------
-        this.canvasRef.current.addEventListener("mousedown", (e)=> {
-            if (e.button === 0) {
-                this.setState({mouseDown: true});
-            }
-        }, false);
-        this.canvasRef.current.addEventListener("mousemove", (e)=>{
-            if (this.state.mouseDown) {
-                // TODO
-                this.props.onTranslate({x: -e.movementX, y: e.movementY});
-            }
-        }, false);
-        this.canvasRef.current.addEventListener("mouseup", (e)=> {
-            if (e.button === 0) {
-                this.setState({mouseDown: false});
-            }
-        }, false);
+        // this.canvasRef.current.addEventListener("mousedown", (e)=> {
+        //     if (e.button === 0) {
+        //         this.setState({mouseDown: true});
+        //     }
+        // }, false);
+        // this.canvasRef.current.addEventListener("mousemove", (e)=>{
+        //     if (this.state.mouseDown) {
+        //         // this.props.onTranslate({x: -e.movementX, y: e.movementY});
+        //         e.preventDefault();
+        //         const size = this.GetWindowSize(); if (size === undefined) return;
+        //         let offset = ScreenToWorld(
+        //             {x: e.offsetX, y: e.offsetY},
+        //             this.props.canvasTranslation,
+        //             this.props.canvasZoom, size
+        //         );
+        //         console.log(offset);
+        //     }
+        // }, false);
+        // this.canvasRef.current.addEventListener("mouseup", (e)=> {
+        //     if (e.button === 0) {
+        //         this.setState({mouseDown: false});
+        //     }
+        // }, false);
 
         // ----------------------------- Zoom Events -------------------------------------------------------------------
         this.canvasRef.current.addEventListener("wheel", (e)=>{
             e.preventDefault();
-            if (this.canvasRef.current === null || this.canvasRef.current === undefined) return;
-            const size = { x: this.canvasRef.current.clientWidth, y: this.canvasRef.current.clientHeight};
-            let tempScroll = LinearInterp(-e.deltaY, -100, 100, -0.2, 0.2);
+            const size = this.GetWindowSize(); if (size === undefined) return;
+            let delta = LinearInterp(-e.deltaY, -100, 100, -0.2, 0.2);
 
-            let zoomAround = ScreenToWorld({x: e.offsetX - (size.x/2.0), y: e.offsetY - (size.y/2.0)},
-                this.props.canvasTranslation, this.props.canvasZoom);
+            const zoomAround =  ScreenToWorld(
+                {x: e.offsetX, y: e.offsetY},
+                this.props.canvasTranslation,
+                this.props.canvasZoom, size
+            );
 
-            this.props.onZoom(tempScroll, {x: -zoomAround.x, y: zoomAround.y});
+            this.props.onZoom(delta, zoomAround);
         });
 
         // ----------------------------- Context Actions ---------------------------------------------------------------

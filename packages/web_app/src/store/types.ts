@@ -32,7 +32,7 @@ export const defaultState: StateType = {
     userStorage: {
         theme:  DarkTheme,
         canvas: {
-            zoom: 0.4,
+            zoom: 1.0,
             translation: { x: 0.0, y: 0.0 }
         }
     }

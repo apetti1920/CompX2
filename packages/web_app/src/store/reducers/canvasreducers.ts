@@ -27,7 +27,7 @@ export default function (state: StateType, action: ActionPayloadType): StateType
             const delta: number = action.payload['delta'];
 
             const newZoom = state.userStorage.canvas.zoom + delta;
-            const clampedZoom = Clamp(newZoom, 1/3, 4);
+            const clampedZoom = Clamp(newZoom, 1, 2);
 
             //Get the zoom around point
             const zoomAround: PointType = action.payload['around'];
@@ -36,8 +36,8 @@ export default function (state: StateType, action: ActionPayloadType): StateType
             const scaleChange = clampedZoom - state.userStorage.canvas.zoom;
             const newTranslation = {
                 x: state.userStorage.canvas.translation.x - (zoomAround.x * scaleChange),
-                y: state.userStorage.canvas.translation.y - (zoomAround.y * scaleChange)
-            }
+                y: state.userStorage.canvas.translation.y + (zoomAround.y * scaleChange)
+            };
 
             // Set the temp states
             tempState.userStorage.canvas.zoom = clampedZoom;
