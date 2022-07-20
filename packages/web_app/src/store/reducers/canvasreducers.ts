@@ -20,7 +20,7 @@ export default function (state: StateType, action: ActionPayloadType): StateType
             const delta: number = action.payload['delta'];
 
             const newZoom = state.userStorage.canvas.zoom + delta;
-            const clampedZoom = Clamp(newZoom, 1, 2);
+            const clampedZoom = Clamp(newZoom, 0.5, 2.5); // TODO: Set this to some env variable
 
             //Get the zoom around point
             const zoomAround: PointType = action.payload['around'];
