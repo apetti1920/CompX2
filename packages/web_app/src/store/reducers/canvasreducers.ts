@@ -16,23 +16,23 @@ export default function (state: StateType, action: ActionPayloadType): StateType
         case (ZoomedCanvasActionType): {
             const tempState  = _.cloneDeep(state);
 
-            // Calculate the new zoom with the delta
-            const delta: number = action.payload['delta'];
-
-            const newZoom = state.userStorage.canvas.zoom + delta;
-            const clampedZoom = Clamp(newZoom, 0.5, 2.5); // TODO: Set this to some env variable
-
-            //Get the zoom around point
+            // Get the zoom delta and zoom around point
+            const delta: number = action.payload['delta'] * 1.25;
             const zoomAround: PointType = action.payload['around'];
 
-            // calculate the new translation about the scale change
+            // Calculate the zoom and ultimate scale change
+            // Have to recalculate delta becuase clamping may limit delta
+            // TODO: Set this to some env variable
+            const clampedZoom = Clamp(state.userStorage.canvas.zoom + delta, 0.5, 10);
             const scaleChange = clampedZoom - state.userStorage.canvas.zoom;
+
+            // Calculate the translation to keep the center of the zoom around the mouse
             const newTranslation = {
                 x: state.userStorage.canvas.translation.x - (zoomAround.x * scaleChange),
                 y: state.userStorage.canvas.translation.y + (zoomAround.y * scaleChange)
             };
 
-            // Set the temp states
+            // Set the new state
             tempState.userStorage.canvas.zoom = clampedZoom;
             tempState.userStorage.canvas.translation = newTranslation;
 

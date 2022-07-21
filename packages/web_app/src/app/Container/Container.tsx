@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-import CanvasContainer from "./Canvas/CanvasContainer2";
+import CanvasContainer from "./Canvas/CanvasContainer";
 import Overlay from "./Overlay";
 
 type PropType = {};

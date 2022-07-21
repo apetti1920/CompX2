@@ -33,8 +33,10 @@ function DrawGridInt(
 
 function DrawGridCirc(
     context: CanvasRenderingContext2D, size: PointType, position: PointType,
-    spacing: number, lineWidth: number, color: string
+    spacing: number, radius: number, color: string
 ) {
+    const TWO_PI = 2 * Math.PI;
+
     const halfSizeX = size.x / 2.0; const halfSizeY = size.y / 2.0;
     const xLow = spacing*Math.ceil((position.x-halfSizeX)/spacing);
     const xHigh = spacing*Math.floor((position.x + halfSizeX)/spacing);
@@ -48,7 +50,7 @@ function DrawGridCirc(
             const yPos = halfSizeY - (iy - position.y);
 
             context.beginPath();
-            context.arc(xPos, yPos, lineWidth, 0, 2 * Math.PI, false);
+            context.arc(xPos, yPos, radius, 0, TWO_PI, false);
             context.fillStyle = color;
             context.fill();
         }
@@ -58,64 +60,51 @@ function DrawGridCirc(
 export default function DrawGrid(
     context: CanvasRenderingContext2D, size: PointType, position: PointType, zoomLevel: number
 ) {
-    const zoomInterval = 1.8; const color = '#888';
-    const pct = Math.round((((zoomLevel % zoomInterval) / zoomInterval) + Number.EPSILON) * 1000) / 1000;
-    const spacing = pct * 500;
+    const zoomInterval = 8; const color = '#888';
+    const pct =  (zoomLevel % zoomInterval) / zoomInterval;
+    const level = Math.ceil(zoomLevel / zoomInterval)
+    const spacing = 50 * zoomLevel / level;
 
-    console.log(zoomLevel, pct, spacing, spacing/10, spacing*10);
+    if (pct >= 0.0 && pct < (1/5)) {
+        // fade in 1
+        const opacity = Clamp(LinearInterp(pct, 0.0, (1/5), 0.5, 1.0), 0.0, 1.0);
+        DrawGridCirc(context, size, position, spacing, 1.5, SetOpacity(color, opacity));
 
-    if (pct >= 0.0 && pct <= (1/7)) {
-        // Nothing 1
-        // Grow 2
-        const radius = LinearInterp(pct, 0.0, (1/7), 1.0, 3.0);
-        DrawGridCirc(context, size, position, spacing*10, radius, color);
-    } else if (pct <= (2/7)) {
-        // fade In 1
-        const opacity1 = Clamp(LinearInterp(pct, (1/7), (2/7), 0.0, 1.0), 0.0, 1.0);
-        DrawGridCirc(context, size, position, spacing, 1.0, SetOpacity(color, opacity1));
-
-        // Hold 2
-        DrawGridCirc(context, size, position, spacing*10, 3.0, color);
-    } else if (pct <= (3/7)) {
-        // Hold 1
-        DrawGridCirc(context, size, position, spacing, 1.0, color);
-
-        // Fade Out 2
-        const opacity = Clamp(LinearInterp(pct, (2/7), (3/7), 1.0, 0.0), 0.0, 1.0);
         DrawGridCirc(context, size, position, spacing*10, 3.0, SetOpacity(color, opacity));
-    } else if (pct <= (4/7)) {
-        // Hold 1
-        DrawGridCirc(context, size, position, spacing, 1.0, color);
+    } else if (pct >= (1/5) && pct < (2/5)) {
+        // hold 1
+        DrawGridCirc(context, size, position, spacing, 1.5, color);
 
-        // Nothing 2
-    } else if (pct <= (5/7)) {
-        // Grow 1
-        const radius = LinearInterp(pct, (4/7), (5/7), 1.0, 3.0);
+        const radius1 = LinearInterp(pct, (1/5), (2/5), 3.0, 1.5);
+        const opacity = Clamp(LinearInterp(pct, (1/5), (2/5), 1.0, 0.0), 0.0, 1.0);
+        DrawGridCirc(context, size, position, spacing*10, radius1, SetOpacity(color, opacity));
+    } else if (pct >= (2/5) && pct < (3/5)) {
+
+        // grow 1
+        const radius = LinearInterp(pct, (2/5), (3/5), 1.5, 3.0);
         DrawGridCirc(context, size, position, spacing, radius, color);
 
-        // Fade In 2
-        const opacity1 = Clamp(LinearInterp(pct, (4/7), (5/7), 0.0, 1.0), 0.0, 1.0);
-        DrawGridCirc(context, size, position, spacing/10.0, 1.0, SetOpacity(color, opacity1));
-    } else if (pct <= (6/7)) {
-        // Hold 1
+        if (pct >= (8/15)) {
+            const opacity = Clamp(LinearInterp(pct, (8 / 15), (3 / 5), 0.0, 1.0), 0.0, 1.0);
+            DrawGridCirc(context, size, position, spacing / 10, 1.5, SetOpacity(color, opacity));
+        }
+    } else if (pct >= (3/5) && pct < (4/5)) {
+        // hold 1
         DrawGridCirc(context, size, position, spacing, 3.0, color);
 
-        // Hold 2
-        DrawGridCirc(context, size, position, spacing/10.0, 1.0, color);
-    } else if (pct <= 1.0) {
-        // Fade Out 1
-        const opacity = Clamp(LinearInterp(pct, (6/7), 1.0, 1.0, 0.0), 0.0, 1.0);
-        DrawGridCirc(context, size, position, spacing, 3.0, SetOpacity(color, opacity));
+        DrawGridCirc(context, size, position, spacing/10, 1.5, color);
+    } else if (pct >= (4/5) && pct < (5/5)) {
+        // scale down fade out
+        const radius1 = LinearInterp(pct, (4/5), (5/5), 3.0, 1.5);
+        const opacity1 = Clamp(LinearInterp(pct, (4/5), (5/5), 1.0, 0.5), 0.0, 1.0);
+        DrawGridCirc(context, size, position, spacing, radius1, SetOpacity(color, opacity1));
 
-        // Hold 2
-        DrawGridCirc(context, size, position, spacing/10.0, 1.0, color);
+        const radius = LinearInterp(pct, (4/5), (5/5), 1.5, 3.0);
+        const opacity2 = Clamp(LinearInterp(pct, (4/5), (5/5), 1.0, 0.0), 0.0, 1.0);
+        DrawGridCirc(context, size, position, spacing / 10, radius, SetOpacity(color, opacity2));
+
+        if (pct >= (23/25)) {
+            DrawGridCirc(context, size, position, 50 * zoomLevel / (level + 1), 1.5, color);
+        }
     }
-
-    // context.beginPath();
-    // context.arc(
-    //     (size.x/2.0)+position.x, (size.y/2.0)+position.y, 10*zoomLevel,
-    //     0, 2 * Math.PI, false
-    // );
-    // context.fillStyle = 'red';
-    // context.fill();
 }
