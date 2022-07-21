@@ -7,6 +7,7 @@ import {StateType as SaveState} from "../../../store/types";
 import {connect} from "react-redux";
 import {bindActionCreators, Dispatch} from "redux";
 import {TranslatedCanvasAction, ZoomedCanvasAction} from "../../../store/actions/canvasactions";
+import {throttle} from 'lodash';
 import DrawGraph from "./Graph/GraphComponent";
 
 type GlobalProps = {
@@ -25,59 +26,90 @@ type StateType = {
 };
 
 class CanvasContainer extends Component<PropsType, StateType> {
+    // Initialize some class variables
     private readonly wrapperRef: React.MutableRefObject<HTMLDivElement | null>;
     private readonly canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
 
+    // Create the Component
     constructor(props: PropsType) {
         super(props);
 
-        this.wrapperRef = React.createRef(); this.canvasRef = React.createRef();
+        // Set the refs
+        this.wrapperRef = React.createRef();
+        this.canvasRef = React.createRef();
 
-        this.state = {
-            context: undefined,
-            mouseDown: false
-        }
+        // Define the initial state
+        this.state = { context: undefined, mouseDown: false }
     }
 
+    // Function call to do actions when the react componenet updates
     componentDidUpdate(prevProps: Readonly<PropsType>, prevState: Readonly<StateType>, snapshot?: any) {
+        // Check if any properties have changed
         if (prevProps.canvasZoom !== this.props.canvasZoom || prevProps.canvasTranslation !== this.props.canvasTranslation) {
+            // ReDraw on the next animation frame
             requestAnimationFrame(()=>this.Draw());
         }
     }
 
+    // Function centers the grid around 0,0 on screnn
     center = () => {
+        // Ensure the canvas ref is present
         if (this.canvasRef === null || this.canvasRef.current === null) return;
 
+        // Translate the graph back from its current location to 0,0
         this.props.onTranslate({x: -this.props.canvasTranslation.x, y: -this.props.canvasTranslation.y});
     }
 
+    // Draw call function
     Draw() {
+        // Check for context and ref
         if (this.state.context === undefined || this.canvasRef.current === null) return;
+
+        // Calculate the size of the screen and clear it from previous draw calls
         const size = this.GetWindowSize(); if (size === undefined) return;
         this.state.context.clearRect(0, 0, size.x, size.y);
 
+        // Draw the grid and graph
         DrawGrid(this.state.context, size, this.props.canvasTranslation, this.props.canvasZoom);
         DrawGraph(this.state.context, size, this.props.canvasTranslation, this.props.canvasZoom);
     }
 
+    // Helper function to get the current window size
     GetWindowSize(): PointType | undefined {
+        // Check if the canvas ref is present
         if (this.canvasRef.current === null || this.canvasRef.current === undefined) return;
+
+        // Returnt the current windows size
         return { x: this.canvasRef.current.clientWidth, y: this.canvasRef.current.clientHeight};
     }
 
-    componentDidMount() {
-        // Setup Work
+    ResetCanvasSize = ()  => {
+        // Check if the refs are present
         if (this.wrapperRef.current === null || this.wrapperRef.current === undefined) return;
-        if (this.canvasRef.current === null || this.canvasRef.current === undefined) return;
+        if (this.canvasRef.current  === null || this.canvasRef.current  === undefined) return;
 
+        // Set the canvas refs width and height to be the wrapers
+        // This enforces that the canvas take up the full screen realistate
         this.canvasRef.current.width = this.wrapperRef.current.clientWidth;
         this.canvasRef.current.height = this.wrapperRef.current.clientHeight;
+    }
 
+    // Setup function for when the component mounts
+    componentDidMount() {
+        // Check if the refs are present
+        if (this.wrapperRef.current === null || this.wrapperRef.current === undefined) return;
+        if (this.canvasRef.current  === null || this.canvasRef.current  === undefined) return;
+        this.ResetCanvasSize();
+
+        // set the context and check if it is present
         const context: CanvasRenderingContext2D | null = this.canvasRef.current.getContext('2d');
         if (context === null) return;
 
         // ----------------------------- Resize ------------------------------------------------------------------------
-        window.addEventListener('resize', ()=>requestAnimationFrame(()=>this.Draw()));
+        window.addEventListener('resize', throttle(() => requestAnimationFrame(()=>{
+            this.ResetCanvasSize();
+            this.Draw();
+        }), 350));
 
         // ----------------------------- Mouse Events ------------------------------------------------------------------
         this.canvasRef.current.addEventListener("mousedown", (e)=> {

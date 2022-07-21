@@ -7,7 +7,7 @@ import { Container, Navbar, Form } from "react-bootstrap";
 
 import { StateType as SaveState } from '../../../store/types'
 import { ThemeType } from "../../../types";
-import { SetOpacity } from "../../../theme/helpers";
+import { SetOpacityHex } from "../../../theme/helpers";
 
 type GlobalProps = {
     theme: ThemeType
@@ -34,8 +34,8 @@ class Overlay extends Component<PropsType, StateType> {
                 <div style={{
                     width: "100%",
                     height: "150px",
-                    background: `linear-gradient(to top, ${SetOpacity(this.props.theme.palette.background, 0.0)}, 
-                                    ${SetOpacity(this.props.theme.palette.background, 1.0)})`,
+                    background: `linear-gradient(to top, ${SetOpacityHex(this.props.theme.palette.background, 0.0)}, 
+                                    ${SetOpacityHex(this.props.theme.palette.background, 1.0)})`,
                     pointerEvents: "auto"
                 }}>
                     <Container fluid style={{height: "50px", padding: this.TopPadding}}>
@@ -64,7 +64,7 @@ class Overlay extends Component<PropsType, StateType> {
                                 justifyContent: "flex-end", alignItems: "center", gap: "5px"
                             }}>
                                 <Play stroke={this.props.theme.palette.shadow}
-                                      fill={SetOpacity(this.props.theme.palette.shadow, 0.5)}/>
+                                      fill={SetOpacityHex(this.props.theme.palette.shadow, 0.5)}/>
                                 <style>{`
                                     #simTimeInput::placeholder {
                                       color: ${this.props.theme.palette.text};
