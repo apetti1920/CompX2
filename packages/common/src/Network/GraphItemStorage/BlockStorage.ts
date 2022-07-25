@@ -62,5 +62,7 @@ export interface VisualBlockStorageType<Inputs extends PortStringListType, Outpu
         position: PointType
         size: PointType
         mirrored: boolean,
-        shape: "rect" | "tri" | "circ"
+        shape: "rect" | "circ" | "tri",
+        color?: string,
+        icon?: string
     }
