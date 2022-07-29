@@ -15,20 +15,7 @@ export type StateType = {
 };
 
 export const defaultState: StateType = {
-    currentGraph: { blocks: [{
-        id: "t1",
-        name: "test",
-        visualName: "test",
-        description: "A test Block",
-        tags: [],
-        position: {x: 0, y:0},
-        size: {x: 400, y: 450},
-        mirrored: false,
-        shape: "rect",
-        callbackString: "",
-        inputPorts: [],
-        outputPorts: []
-    }] },
+    currentGraph: { blocks: [] },
     userStorage: {
         theme:  DarkTheme,
         canvas: {

@@ -6,9 +6,9 @@ type KonvaEventObject<T> = Konva.KonvaEventObject<T>;
 
 import { PointType } from '@compx/common/Types';
 import { Clamp, LinearInterp } from '@compx/common/Helpers/Other';
+import { WheelHandler } from '../utils'
 import { ThemeType } from "../../../../types";
 import { HexToRgbA, SetOpacityHex } from "../../../../theme/helpers";
-import { ScreenToWorld } from "../../../../helpers";
 
 
 // ----------------------------------- Grid Helpers --------------------------------------------------------------------
@@ -163,7 +163,8 @@ class GridInt extends Component<GridPropType, {}> {
 type PropType = {
     screenSize: PointType, canvasTranslation: PointType, canvasZoom: number,
     theme: ThemeType, onTranslate: (position: PointType)=>void,
-    onZoom: (delta: number, zoomAround: PointType) => void
+    onZoom: (delta: number, zoomAround: PointType) => void,
+    onClick: ()=>void
 };
 
 type StateType = {
@@ -213,20 +214,6 @@ export default class Grid extends Component<PropType, StateType> {
         e.cancelBubble = true;
     }
 
-    WheelHandler = (e: Konva.KonvaEventObject<WheelEvent>) => {
-        e.evt.preventDefault();
-        let delta = LinearInterp(-e.evt.deltaY, -100, 100, -0.2, 0.2);
-
-        const zoomAround =  ScreenToWorld(
-            {x: e.evt.offsetX, y: e.evt.offsetY},
-            this.props.canvasTranslation,
-            this.props.canvasZoom, this.props.screenSize
-        );
-
-        this.props.onZoom(delta, zoomAround);
-        e.cancelBubble = true;
-    }
-
     render() {
         return (
             <React.Fragment>
@@ -240,7 +227,10 @@ export default class Grid extends Component<PropType, StateType> {
                     x={0} y={0} width={this.props.screenSize.x} height={this.props.screenSize.y}
                     onMouseDown={this.MouseDownHandler} onMouseMove={this.MouseMoveHandler}
                     onMouseUp={this.MouseUpHandler} onMouseOut={this.MouseOutHandler}
-                    onWheel={this.WheelHandler}
+                    onWheel={(e)=>WheelHandler(
+                        e, this.props.onZoom, this.props.canvasTranslation,
+                        this.props.canvasZoom, this.props.screenSize
+                    )} onClick={this.props.onClick}
                 />
             </React.Fragment>
         )
