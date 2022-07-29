@@ -85,6 +85,7 @@ class CanvasContainer extends Component<PropsType, StateType> {
     }
 
     onDeselectBlocks = () => {
+        // TODO: Only call deselect if cache is present
         // if (this.state.selectedBlockIdsCache.length > 0) {
         this.props.onDeselectBlocks();
         //     this.setState({selectedBlockIdsCache: []});
@@ -123,6 +124,7 @@ class CanvasContainer extends Component<PropsType, StateType> {
                         </Layer>
                     ) : <React.Fragment /> }
 
+                    {/*TODO: Impliment Moving Layer*/}
                     {/*{this.props.blocks.filter(blo).length > 0 ? (*/}
                     {/*    <Layer id="dragging-graph">*/}
                     {/*        <GraphComponent*/}

@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from 'electron';
+const url = require('url');
 const path = require('path');
 
 function createWindow () {
@@ -10,8 +11,16 @@ function createWindow () {
         }
     });
 
-    win.loadFile(path.join(__dirname, "..", "renderer", "index.html"))
-        .then(() => console.log("Loaded Webpage"));
+    win.loadURL(
+        process.env.ELECTRON_START_URL ||
+        url.format({
+            pathname: path.join(__dirname, '/../renderer/index.html'),
+            protocol: 'file:',
+            slashes: true
+        })
+    );
+
+    win.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {
