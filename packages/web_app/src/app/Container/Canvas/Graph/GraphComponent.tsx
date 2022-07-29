@@ -8,6 +8,7 @@ import { ThemeType } from "../../../../types";
 type PropType = {
     blocks: VisualBlockStorageType<any, any>[],
     onSelectedBlock: (blockId: string, selectMultiple: boolean)=>void,
+    onMoveBlocks: (delta: PointType)=>void,
     screenSize: PointType,
     canvasTranslation: PointType,
     canvasZoom: number,
@@ -19,7 +20,8 @@ export default function(props: PropType) {
     return (
         <React.Fragment>
             {props.blocks.map(block => <BlockComponent
-                onSelectBlock={props.onSelectedBlock}
+                key={`block-${block.id}`}
+                onSelectBlock={props.onSelectedBlock} onMouseMove={props.onMoveBlocks}
                 screenSize={props.screenSize} canvasTranslation={props.canvasTranslation}
                 canvasZoom={props.canvasZoom} block={block} theme={props.theme}
                 onZoom={props.onZoom} /> )}

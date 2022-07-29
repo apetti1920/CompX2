@@ -6,6 +6,7 @@ import {throttle} from "lodash";
 import Konva from 'konva';
 import {Stage, Layer, Rect} from 'react-konva';
 
+import { PortStringListType } from '@compx/common/Graph/Port'
 import { VisualBlockStorageType } from '@compx/common/Network/GraphItemStorage/BlockStorage';
 import { PointType } from '@compx/common/Types'
 import {StateType as SaveState} from "../../../store/types";
@@ -13,15 +14,19 @@ import {TranslatedCanvasAction, ZoomedCanvasAction} from "../../../store/actions
 import Grid from "./Grid/Grid";
 import {ThemeType} from "../../../types";
 import GraphComponent from "./Graph/GraphComponent";
-import { MakeVisualGraph } from './testGraph';
+import {DeselectBlockAction, MovedBlocksAction, SelectBlockAction} from "../../../store/actions/graphactions";
 
 
 type GlobalProps = {
     canvasZoom: number,
     canvasTranslation: PointType,
+    blocks:  VisualBlockStorageType<PortStringListType, PortStringListType>[]
     theme: ThemeType
 }
 type DispatchProps = {
+    onSelectBlock: (blockId: string, selectMultiple: boolean) => void,
+    onDeselectBlocks: () => void
+    onMoveBlocks: (delta: PointType) => void,
     onZoom: (delta: number, around: PointType) => void,
     onTranslate: (point: PointType) => void
 }
@@ -29,8 +34,8 @@ type ComponentProps = {};
 type PropsType = GlobalProps & DispatchProps & ComponentProps
 type StateType = {
     canvasSize: PointType,
-    blocks: VisualBlockStorageType<any, any>[],
-    selectedBlockIdsCache: string[]
+    dragging: boolean
+    // selectedBlockIdsCache: string[]
 };
 
 class CanvasContainer extends Component<PropsType, StateType> {
@@ -45,11 +50,10 @@ class CanvasContainer extends Component<PropsType, StateType> {
         this.wrapperRef = React.createRef();
         Konva.pixelRatio = 1;
 
-        const blocks = MakeVisualGraph(3).blocks;
         this.state = {
             canvasSize: { x: 0.0, y: 0.0 },
-            blocks: blocks,
-            selectedBlockIdsCache: blocks.filter(block => block.selected).map(block => block.id)
+            dragging: false
+            // selectedBlockIdsCache: []
         }
     }
 
@@ -67,34 +71,24 @@ class CanvasContainer extends Component<PropsType, StateType> {
 
         // ----------------------------- Resize Event ------------------------------------------------------------------
         window.addEventListener('resize', throttle(() => requestAnimationFrame(SetWindowSize), 180));
+
+        // --------------------------------- Initialize Blocks ---------------------------------------------------------
+        // blocks.filter(block => block.selected).map(block => block.id)
     }
 
     // -------------------------------------- Block Events -------------------------------------------------------------
     onSelectBlock = (blockId: string, selectMultiple: boolean) => {
-        const tmpBlocks = this.state.blocks;
-        let cache = tmpBlocks.filter(block => block.selected).map(block => block.id)
-        const blockInd = tmpBlocks.findIndex(block => block.id === blockId);
-
-        if (!selectMultiple) {
-            this.onDeselectBlocks();
-            tmpBlocks[blockInd].selected = true;
-            cache = [tmpBlocks[blockInd].id]
-        } else {
-            tmpBlocks[blockInd].selected = !tmpBlocks[blockInd].selected;
-            if (tmpBlocks[blockInd].selected) cache.push(tmpBlocks[blockInd].id);
-            else cache.splice(blockInd, 1)
-        }
-
-        this.setState({blocks: tmpBlocks, selectedBlockIdsCache: cache});
+        this.props.onSelectBlock(blockId, selectMultiple);
+        // this.setState({
+        //     selectedBlockIdsCache: this.props.blocks.filter(block => block.selected).map(block => block.id)
+        // });
     }
 
     onDeselectBlocks = () => {
-        if (this.state.selectedBlockIdsCache.length > 0) {
-            this.setState({blocks: this.state.blocks.map(block => {
-                block.selected = false;
-                return block
-            }), selectedBlockIdsCache: []});
-        }
+        // if (this.state.selectedBlockIdsCache.length > 0) {
+        this.props.onDeselectBlocks();
+        //     this.setState({selectedBlockIdsCache: []});
+        // }
     }
 
     render() {
@@ -119,16 +113,17 @@ class CanvasContainer extends Component<PropsType, StateType> {
                         />
                     </Layer>
 
-                    {this.state.blocks.length > 0 ? (
+                    {this.props.blocks.length > 0 ? (
                         <Layer id="graph">
                             <GraphComponent
-                                blocks={this.state.blocks} onSelectedBlock={this.onSelectBlock}
+                                blocks={this.props.blocks}
+                                onSelectedBlock={this.onSelectBlock} onMoveBlocks={this.props.onMoveBlocks}
                                 screenSize={this.state.canvasSize} canvasTranslation={this.props.canvasTranslation}
                                 canvasZoom={this.props.canvasZoom} theme={this.props.theme} onZoom={this.props.onZoom} />
                         </Layer>
                     ) : <React.Fragment /> }
 
-                    {/*{this.state.draggingBlocks.length > 0 ? (*/}
+                    {/*{this.props.blocks.filter(blo).length > 0 ? (*/}
                     {/*    <Layer id="dragging-graph">*/}
                     {/*        <GraphComponent*/}
                     {/*            blocks={this.state.draggingBlocks}*/}
@@ -146,6 +141,7 @@ class CanvasContainer extends Component<PropsType, StateType> {
 // Creates a function to map the redux state to the redux props
 function mapStateToProps(state: SaveState): GlobalProps {
     return {
+        blocks: state.currentGraph.blocks,
         canvasZoom: state.userStorage.canvas.zoom,
         canvasTranslation: state.userStorage.canvas.translation,
         theme: state.userStorage.theme
@@ -155,6 +151,9 @@ function mapStateToProps(state: SaveState): GlobalProps {
 // Creates  a function to map the redux actions to props
 function mapDispatchToProps(dispatch: Dispatch): DispatchProps {
     return bindActionCreators({
+        onSelectBlock: SelectBlockAction,
+        onDeselectBlocks: DeselectBlockAction,
+        onMoveBlocks: MovedBlocksAction,
         onTranslate: TranslatedCanvasAction,
         onZoom: ZoomedCanvasAction
     }, dispatch)

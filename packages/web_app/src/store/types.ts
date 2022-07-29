@@ -2,6 +2,7 @@ import { VisualGraphStorageType } from '@compx/common/Network/GraphItemStorage/G
 import { PointType } from '@compx/common/Types'
 import {ThemeType} from "../types";
 import DarkTheme from "../theme/DarkTheme";
+import {MakeVisualGraph} from "./testGraph";
 
 export type StateType = {
     currentGraph: VisualGraphStorageType,
@@ -15,7 +16,7 @@ export type StateType = {
 };
 
 export const defaultState: StateType = {
-    currentGraph: { blocks: [] },
+    currentGraph: { blocks: MakeVisualGraph(30).blocks },
     userStorage: {
         theme:  DarkTheme,
         canvas: {
